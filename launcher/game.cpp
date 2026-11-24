@@ -294,9 +294,4 @@ const std::vector<GameControlGroup>& GameControlsFor(uint32_t language) {
   }
 }
 
-const std::vector<GameControlGroup>& GameDrumControlsFor(uint32_t, bool) {
-  static const std::vector<GameControlGroup> kNone;
-  return kNone;
-}
-
 }  // namespace launcher::game

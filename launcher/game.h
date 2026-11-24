@@ -130,11 +130,19 @@ inline constexpr std::array<Language, 5> kLanguages{{
 }};
 
 // Switches of the game's own (src/), each a boolean cvar with a row in the Settings tab (game_types.h's Toggle); their
-// titles, hints and help are game.cpp's (GameTexts::toggles and toggle_help, in this order). In Settings > Game, off as
-// on the console: the boot's videos skipped (src/intro.cpp).
+// titles, hints and help are game.cpp's (GameTexts::toggles and toggle_help, in this order). In Settings > Game >
+// Starting the game (launcher 3.28's kStart), off as on the console: the boot's videos skipped (src/intro.cpp).
 inline constexpr std::array<Toggle, 1> kToggles{{
-    {"ghaerosmith_skip_intro", false},
+    {"ghaerosmith_skip_intro", false, ToggleGroup::kStart},
 }};
+
+// Rows of the game's own with several values (launcher 3.29): none here.
+inline constexpr std::array<Choice, 0> kChoices{};
+
+// The Mods tab's Highway section's gallery and preview (launcher 3.30): this game has no highway mods.
+inline constexpr bool kHighwayPreview = false;
+inline constexpr HighwayGallery kHighwayGallery{};
+inline constexpr HighwayAssets kHighwayAssets{};
 
 // Whether some switch is in `group`.
 constexpr bool HasToggles(ToggleGroup group) {
@@ -222,23 +230,8 @@ const std::vector<GameControlGroup>& GameControlsFor(uint32_t language);
 
 // --- Drums ---
 
-// Guitar Hero III's engine has no drums (launcher 3.19.1's Instrument row offers them only with this): no drum kit
-// rows. The keyboard's drum keys and the drum controls below are only there for the launcher's code to build.
-inline constexpr bool kHasDrums = false;
-inline constexpr bool kHasFourLaneDrums = false;
-inline constexpr std::array<KeyDefault, 8> kDrumKeyboardDefaults{{
-    {"keybind_b", "D"},
-    {"keybind_y", "F"},
-    {"keybind_x", "J"},
-    {"keybind_right_shoulder", "K"},
-    {"keybind_a", "L"},
-    {"keybind_left_shoulder", "Space"},
-    {"keybind_back", "Backspace"},
-    {"keybind_rstick_right", ""},
-}};
-inline constexpr std::array<KeyDefault, 8> kDrumKeyboardDefaultsFourLanes = kDrumKeyboardDefaults;
-// None (kHasDrums false).
-const std::vector<GameControlGroup>& GameDrumControlsFor(uint32_t language, bool four_lanes);
+// Guitar Hero III's engine has no drums: launcher 3.23.1's defaults (game_types.h: kHasDrums false, no drum keys or
+// controls) leave out every drum row.
 
 struct GameTexts {
   // The first run's welcome, in the game's spirit; null: the launcher's own (texts.cpp).
@@ -248,6 +241,11 @@ struct GameTexts {
   std::array<const char*, kToggles.size() * 2> toggles;
   // kToggles' help, the Settings tab's panel for the row in focus; null: the hint.
   std::array<const char*, kToggles.size()> toggle_help{};
+  // kChoices' rows (launcher 3.29): a title and a hint each, their help (null: the hint) and their values' names (null
+  // or missing: the value and the row's suffix).
+  std::array<const char*, kChoices.size() * 2> choices{};
+  std::array<const char*, kChoices.size()> choice_help{};
+  std::array<std::array<const char*, 2>, kChoices.size()> choice_values{};
   // The first run's last screen (the game installed), in the game's spirit; null: the launcher's own.
   const char* done_title = nullptr;
   const char* done_text = nullptr;

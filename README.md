@@ -101,6 +101,7 @@ and linked, and draws this game once its side is written (`src/native_x_renderer
 
 - [ReXGlue SDK](https://github.com/rexglue/rexglue-sdk), whose runtime is derived from [Xenia](https://xenia.jp).
 - [extract-xiso](https://github.com/XboxDev/extract-xiso), for extracting the game files.
+- [Panchovix](https://github.com/Panchovix), for the volume up to 200 % and the one-step present in the renderer.
 - Developed by Gustavo Garcia with the help of Claude (Anthropic).
 
 ## License
