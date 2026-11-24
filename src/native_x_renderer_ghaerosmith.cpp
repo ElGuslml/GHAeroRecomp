@@ -107,6 +107,10 @@ const native_x_renderer::Profile& NativeXRendererProfile() {
     // composite. The other 1280x720 resolve of the frame (flags 0x14, from 0x823bf1cc < 0x822ed354) clears after it.
     p.scene_resolve_caller = 0x823BF160;
     p.scene_resolve_once = true;
+    // The post-processing works on reduced copies of the scene, as GH Metallica's (D127): the 320x180 targets of the
+    // glow and the blurs, whose tap offsets are constants for 320x180 texels. At the render scale those offsets skipped
+    // host texels: a lattice in the bloom. They stay at 1x, as on the console.
+    p.unscaled_screen_fractions = true;
     // The ultrawide hooks (src/widescreen.cpp) widen the 16:9 cameras by AspectFactor() and keep the 2D layer at 16:9.
     p.widens_cameras = true;
     // The pipeline list (D129): every shader the game has is in DATA/FXFILES/MaterialLibrary.bin.xen, as in GH Metallica (NativeXRenderer's D129, D133).

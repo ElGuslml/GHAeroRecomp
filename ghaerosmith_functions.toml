@@ -74,6 +74,16 @@ registers = ["r11", "r10"]
 [[midasm_hook]]
 address = 0x822C3760   # addi r1,r1,128 (the end of sub_822C36A0, after its waits for the vertical blank and the render thread)
 name = "GHAerosmithMainFrameHook"
+
+# Measuring performance (src/framerate.cpp): a song's frames by the vertical blanks each took, as GH5's. The render
+# thread's present waits for the frame's blank and reads the count again; its count from the song's timer reset.
+[[midasm_hook]]
+address = 0x822CEA3C   # lwz r11,20544(r29) (sub_822CE808: after bl 0x82175D30 past the wait; r3 = the blank count)
+name = "GHAerosmithFrameBlanksHook"
+registers = ["r3"]
+[[midasm_hook]]
+address = 0x82199E90   # mflr r12 (entry of sub_82199E90, the script function ResetSongTimer)
+name = "GHAerosmithSongTimerResetHook"
 [[midasm_hook]]
 address = 0x822CE908   # cmpld cr6,r3,r11 (sub_822CE808: until the counter 0x82AE38E0 reaches the next value)
 name = "GHAerosmithVblankWaitHook"

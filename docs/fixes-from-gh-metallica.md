@@ -87,7 +87,10 @@ V-Sync on, a rate above the display's runs at the display's (`src/options.cpp`).
 length is measured, `sub_82176050`), so the songs keep their speed: the song's time is the sum of the frames' `mftb`
 intervals and keeps the host's clock (within 1.6 ms over a minute at 480 FPS with V-Sync off). Above 240 the presses
 kept for held scripts reach a 60th of a second at 1000 FPS (32), and the render thread's predicted vertical blank
-sleep shrinks with the period above 250 Hz (`src/thread_waits.cpp`), as GH5's. What counts frames is corrected by `src/framerate.cpp` (`ghaerosmith_frame_rate_fix`):
+sleep shrinks with the period above 250 Hz (`src/thread_waits.cpp`), as GH5's. For a player's log, as GH5's: a song's
+frames by the vertical blanks each took (`[frames]` lines every 3,000 frames and when the song stops or is paused;
+nothing at Unlimited), and NativeXRenderer's summary counts the song's frames apart (D181, `SetMainActivity` from the
+song mark of `src/keyboard.cpp`). What counts frames is corrected by `src/framerate.cpp` (`ghaerosmith_frame_rate_fix`):
 - The scripts' `Wait N gameframes` (249 scripts) last the console's N / 60 s, as in GH Metallica, but this engine runs
   much of its per-frame logic from scripts that wait one game frame in a loop (the guitar's input, star power's
   activation and drain, the note holds, the score, the iterators, the movies, the menus that poll the controllers):

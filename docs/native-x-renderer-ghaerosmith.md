@@ -52,3 +52,12 @@ read. Checked: no dark frame in a whole song (25-43 before) and in 1,000 screens
 
 Left: the crowd's sheets, six 256x512 textures, are resolved into mip levels 1-3 each frame (18 resolves); the library
 resolves level 0 only, as in GH Metallica, so far away they are sampled at level 0.
+
+## The bloom's reduced copies at 1x (D127)
+
+The post-processing blurs reduced copies of the 1280x720 scene, as GH Metallica's: 320x180 targets for the glow and
+the blurs, whose tap offsets are constants for 320x180 texels. Above a render scale of 2 those offsets skip host
+texels, which shows as a grid of dots in the glow (GH Metallica's lattice). The profile sets
+`unscaled_screen_fractions` (2026-11-24): the 320x180 targets and the textures resolved through them stay at 1x, as
+on the console; the log says "native: a reduced copy of the screen, D127". At 1440p (scale 2) it changes nothing seen.
+**Off:** `native_x_renderer_unscaled_screen_fractions = false`.

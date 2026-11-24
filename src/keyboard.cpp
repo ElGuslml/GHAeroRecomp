@@ -43,4 +43,6 @@ namespace ghaerosmith {
 
 void InitializeKeyboard() { rex::input::mnk::SetTapGate(InSong); }
 
+bool PlayingSong() { return InSong(); }
+
 }  // namespace ghaerosmith

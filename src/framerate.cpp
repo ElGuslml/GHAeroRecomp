@@ -22,6 +22,9 @@
 // (GHAerosmithMainFrameHook), the loading screen's animations by the time since their own previous step, so that a
 // frame longer than 1 / the chosen rate (the game below its rate) does not slow them down.
 
+#include "keyboard.h"
+
+#include <native_x_renderer/native_x_renderer.h>
 #include <rex/cvar.h>
 #include <rex/logging.h>
 #include <rex/ppc/context.h>
@@ -192,11 +195,95 @@ void GHAerosmithMainFrameHook() {
   const bool first = previous == std::chrono::steady_clock::time_point{};
   const double elapsed = std::chrono::duration<double>(now - previous).count();
   previous = now;
+  // NativeXRenderer's summary line counts a song's frames apart (its D181): a player's log then measures the play.
+  native_x_renderer::SetMainActivity(ghaerosmith::PlayingSong());
   if (first || elapsed < 0.00025 || elapsed > 0.05) {
     return;
   }
   const double average = g_frame_average.load(std::memory_order_relaxed);
   g_frame_average.store(average > 0.0 ? average + 0.1 * (elapsed - average) : elapsed, std::memory_order_relaxed);
+}
+
+// The frames of a song by the vertical blanks each took, for the log (GH5's and GH Warriors of Rock's): at a fixed rate
+// a frame that misses its blank waits a whole one more, so the frames that took two or more are the ones the player saw
+// twice. sub_822CE808, the render thread presenting a frame, waits until the vertical blank counter (0x82AE38D8, read by
+// sub_82175D30) reaches the frame's blank, reads it again and sets the next frame's from it (the present interval, 1
+// here); the difference from the last frame's count is the blanks this frame took. With an interval of 0 the game skips
+// the wait, and with the blank every millisecond (the launcher's Unlimited, or vsync off) a blank is no display refresh:
+// nothing is counted then. A line every 3,000 of a song's frames, one when the song stops or is paused (the count goes
+// on after a pause), and the count starts again with the song's timer (ResetSongTimer: a song's start or its restart).
+namespace {
+
+struct FrameBlanks {
+  uint64_t frames = 0;  // the song's frames counted
+  uint64_t two = 0;     // of them, those that took two blanks
+  uint64_t more = 0;    // three or more
+  uint64_t next_line = 3000;
+};
+std::mutex g_blanks_mutex;
+FrameBlanks g_blanks;
+uint64_t g_last_blank = 0;     // the last frame's count (only the render thread, the hook's caller)
+bool g_blanks_playing = false;  // whether the last frame was a song's (only the render thread)
+
+void LogFrameBlanks(const FrameBlanks& blanks, const char* when) {
+  const uint64_t missed = blanks.two + blanks.more;
+  REXLOG_INFO("[frames] {}: {} frames at {:.0f} Hz, {} took two vertical blanks and {} three or more ({:.3f} % two or "
+              "more)",
+              when, blanks.frames, VblankRate(), blanks.two, blanks.more,
+              blanks.frames ? 100.0 * double(missed) / double(blanks.frames) : 0.0);
+}
+
+}  // namespace
+
+// [[midasm_hook]] 0x822CEA3C (sub_822CE808: after the wait for the frame's vertical blank, before
+// "lwz r11,20544(r29)"; r3 = the blank count when this frame is presented, from sub_82175D30).
+void GHAerosmithFrameBlanksHook(PPCRegister& r3) {
+  const uint64_t blank = r3.u64;
+  const uint64_t last = g_last_blank;
+  g_last_blank = blank;
+  const bool playing = ghaerosmith::PlayingSong();
+  if (g_blanks_playing && !playing) {
+    // The song stopped (its end, a fail) or was paused: the count so far, if it holds a second's frames.
+    FrameBlanks song;
+    {
+      std::lock_guard lock(g_blanks_mutex);
+      song = g_blanks;
+    }
+    if (song.frames >= uint64_t(VblankRate())) {
+      LogFrameBlanks(song, "the song, stopped or paused");
+    }
+  }
+  g_blanks_playing = playing;
+  if (last == 0 || blank <= last || VblankRate() >= 1000.0 || !playing) {
+    return;
+  }
+  const uint64_t took = blank - last;
+  FrameBlanks line;
+  bool log = false;
+  {
+    std::lock_guard lock(g_blanks_mutex);
+    ++g_blanks.frames;
+    if (took == 2) {
+      ++g_blanks.two;
+    } else if (took > 2) {
+      ++g_blanks.more;
+    }
+    if (g_blanks.frames >= g_blanks.next_line) {
+      g_blanks.next_line += 3000;
+      line = g_blanks;
+      log = true;
+    }
+  }
+  if (log) {
+    LogFrameBlanks(line, "the song so far");
+  }
+}
+
+// [[midasm_hook]] 0x82199E90 (the entry of sub_82199E90, the script function ResetSongTimer: a song starts or restarts,
+// also in the menus): the song's frame blanks counted from zero.
+void GHAerosmithSongTimerResetHook() {
+  std::lock_guard lock(g_blanks_mutex);
+  g_blanks = {};
 }
 
 // [[midasm_hook]] at the entry of sub_82323548 and sub_823234F8 (setting a game-frame wait): r3 = the wait, r4 = N.
