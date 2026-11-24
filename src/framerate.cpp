@@ -18,6 +18,9 @@
 // - Havok's world, stepped by 1/60 s each frame while the bodies that follow the animation move by the frame's time
 //   (the hair and the guitar cables).
 // - The loading screen's wheel and wave, turned and moved by a step each frame.
+// Each of these counts by the frames' real length (GH5's c0cb7b0): the main thread's frames measured at their end
+// (GHAerosmithMainFrameHook), the loading screen's animations by the time since their own previous step, so that a
+// frame longer than 1 / the chosen rate (the game below its rate) does not slow them down.
 
 #include <rex/cvar.h>
 #include <rex/logging.h>
@@ -63,6 +66,17 @@ double VblankRate() {
 bool HighRate() { return REXCVAR_GET(ghaerosmith_frame_rate_fix) && VblankRate() != 60.0; }
 
 double FrameSeconds() { return 1.0 / VblankRate(); }
+
+// The main thread's frames, measured at their end (GHAerosmithMainFrameHook): an exponential average of about the last
+// ten (0.1 a frame), in seconds; 0 until a frame is measured. A clock of our own rather than the game's frame time
+// (0x82AE381C), as GH5's: these steps are the console's frames, whatever the game measured.
+std::atomic<double> g_frame_average{0.0};
+
+// The frame's length the fixes count by: the average of the last frames measured, 1 / the chosen rate until then.
+double FrameInterval() {
+  const double average = g_frame_average.load(std::memory_order_relaxed);
+  return average > 0.0 ? average : FrameSeconds();
+}
 
 uint8_t* GuestBase() {
   auto* kernel = rex::system::kernel_state();
@@ -166,6 +180,22 @@ std::unordered_map<uint32_t, WhammyPasses> g_whammy;  // by the wait's guest add
 
 }  // namespace
 
+// [[midasm_hook]] 0x822C3760 (the end of sub_822C36A0, the main thread's end of frame, after its waits for the vertical
+// blank and the render thread: "addi r1,r1,128"): the time since its previous run, clamped to 0.25-50 ms (a load that
+// stops the main thread is not a frame).
+void GHAerosmithMainFrameHook() {
+  thread_local std::chrono::steady_clock::time_point previous;
+  const auto now = std::chrono::steady_clock::now();
+  const bool first = previous == std::chrono::steady_clock::time_point{};
+  const double elapsed = std::chrono::duration<double>(now - previous).count();
+  previous = now;
+  if (first || elapsed < 0.00025 || elapsed > 0.05) {
+    return;
+  }
+  const double average = g_frame_average.load(std::memory_order_relaxed);
+  g_frame_average.store(average > 0.0 ? average + 0.1 * (elapsed - average) : elapsed, std::memory_order_relaxed);
+}
+
 // [[midasm_hook]] at the entry of sub_82323548 and sub_823234F8 (setting a game-frame wait): r3 = the wait, r4 = N.
 void GHAerosmithFrameWaitSetHook(PPCRegister& r3, PPCRegister& r4) {
   uint8_t* base = GuestBase();
@@ -188,7 +218,7 @@ void GHAerosmithFrameWaitSetHook(PPCRegister& r3, PPCRegister& r4) {
     return;
   }
   const auto now = std::chrono::steady_clock::now();
-  const auto frame = std::chrono::duration<double>(FrameSeconds());
+  const auto frame = std::chrono::duration<double>(FrameInterval());
   std::lock_guard lock(g_frame_waits_mutex);
   FrameWait& wait = g_frame_waits[r3.u32];
   const bool follows = wait.end != std::chrono::steady_clock::time_point{} &&
@@ -200,7 +230,8 @@ void GHAerosmithFrameWaitSetHook(PPCRegister& r3, PPCRegister& r4) {
 
 // [[midasm_hook]] 0x823238E0 (sub_82323888, a game-frame wait's count above 0): before "addi r11,r11,-1" and its
 // store to +4, r3 = the wait, r11 = the count. Set to 1 (it becomes 0, the wait ends next frame) once the wait's end is
-// less than a frame and a half away, so that next frame is the one nearest to it; else to 2 (it stays waiting).
+// less than a frame and a half away (the frames' measured length), so that next frame is the one nearest to it; else to
+// 2 (it stays waiting).
 void GHAerosmithFrameWaitCountHook(PPCRegister& r3, PPCRegister& r11) {
   if (!HighRate()) {
     return;
@@ -219,7 +250,7 @@ void GHAerosmithFrameWaitCountHook(PPCRegister& r3, PPCRegister& r11) {
     REXLOG_INFO("[frame rate] script waits in game frames last as at 60 FPS (vblank at {:.0f} Hz)", VblankRate());
   }
   const double left = std::chrono::duration<double>(end - std::chrono::steady_clock::now()).count();
-  r11.u64 = left < 1.5 * FrameSeconds() ? 1 : 2;
+  r11.u64 = left < 1.5 * FrameInterval() ? 1 : 2;
 }
 
 // [[midasm_hook]] 0x823238EC (sub_82323888, a type 1 game-frame wait whose count is 0): before "b sub_823232B0", which
@@ -364,7 +395,7 @@ void GHAerosmithButtonPollHook(PPCRegister& r4) {
     return;
   }
   const auto now = std::chrono::steady_clock::now();
-  const auto window = std::chrono::duration<double>(1.0 / 60.0 + FrameSeconds());
+  const auto window = std::chrono::duration<double>(1.0 / 60.0 + FrameInterval());
   std::lock_guard lock(g_input_mutex);
   if (g_script_polls.size() > 256) {
     std::erase_if(g_script_polls, [&](const auto& entry) { return now - entry.second.last > std::chrono::seconds(1); });
@@ -439,24 +470,46 @@ void GHAerosmithPhysicsStepHook(PPCRegister& f31) {
 // - the wheel DisplayLoadingScreen gives it (load_wheel at the boot; sub_82394968: the vertices of its mesh turned about
 //   their center by 0.175 radians each frame, 10.5 a second at 60);
 // - in its mode 2 a grid waves with two phases that advance by constants each frame.
-// Above 60 Hz the steps are scaled by 60 / the rate.
+// Above 60 Hz each step is scaled by 60 times the time since that animation's previous step (at most 50 ms; after more
+// than 100 ms without one, as at its start, a frame at the chosen rate), as GH5's.
 namespace {
 
-double FrameStepScale() { return 60.0 / VblankRate(); }
+struct AnimationClock {
+  std::chrono::steady_clock::time_point previous;
+};
+AnimationClock g_wheel_clock, g_wave_clock, g_wave2_clock;
+
+double FrameStepScale(AnimationClock& clock) {
+  const auto now = std::chrono::steady_clock::now();
+  const bool first = clock.previous == std::chrono::steady_clock::time_point{};
+  const double elapsed = std::chrono::duration<double>(now - clock.previous).count();
+  clock.previous = now;
+  if (first || elapsed <= 0.0 || elapsed > 0.1) {
+    return 60.0 * FrameSeconds();
+  }
+  return 60.0 * std::min(elapsed, 0.05);
+}
 
 }  // namespace
 
 // [[midasm_hook]] 0x82394A90 (sub_82394968): after "lfd f31,-11784(r11)", f31 = the wheel's turn in radians each frame.
 void GHAerosmithLoadingWheelHook(PPCRegister& f31) {
   if (HighRate()) {
-    f31.f64 *= FrameStepScale();
+    f31.f64 *= FrameStepScale(g_wheel_clock);
   }
 }
 
-// [[midasm_hook]] 0x82394E58 and 0x82394E68 (sub_82394BD0's mode 2): before "fadds f0,f0,f29" and "fadds f0,f0,f13",
-// f29 / f13 = the step each wave phase advances by.
+// [[midasm_hook]] 0x82394E58 and 0x82394E68 (sub_82394BD0's mode 2, once a frame after the grid's loop): before
+// "fadds f0,f0,f29" and "fadds f0,f0,f13", f29 / f13 = the step each wave phase advances by. Each phase has a hook
+// name of its own, so that each measures its own steps.
 void GHAerosmithLoadingWaveHook(PPCRegister& step) {
   if (HighRate()) {
-    step.f64 = double(float(step.f64 * FrameStepScale()));
+    step.f64 = double(float(step.f64 * FrameStepScale(g_wave_clock)));
+  }
+}
+
+void GHAerosmithLoadingWave2Hook(PPCRegister& step) {
+  if (HighRate()) {
+    step.f64 = double(float(step.f64 * FrameStepScale(g_wave2_clock)));
   }
 }

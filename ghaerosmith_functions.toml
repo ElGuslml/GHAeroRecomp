@@ -23,6 +23,18 @@ cr_as_local = true
 ctr_as_local = true
 xer_as_local = true
 reserved_as_local = true
+# The XDK's inline Interlocked operations disable one core's interrupts around their lwarx / stwcx. (mfmsr rX,
+# mtmsrd r13, ..., mtmsrd rX). By default the codegen turns the three into the SDK's process-wide recursive mutex
+# (GH Warriors of Rock: 10.7 % of a core at 60 FPS, 21.7 % at 120; GH5 has it on too). skip_msr emits nothing for
+# them, so each site is the host's atomic operation alone: the console's meaning, as the pair stopped interrupts on one
+# core, never the other cores. GH5's tools/perf_port/msr_sites_mftb.py (recomp-tools' msr_sites.py with mftb decoded)
+# on 2026-11-24: 68 sites in 51 functions, each one reserved load and store with register arithmetic, compares and
+# branches, and mfmsr's register read by its restores only (5 virtual calls after a restore with it in r7 / r8 not
+# decided: a callee reading it would read the old MSR, a value no caller meant). Its 12 failures, "mtmsrd r13 with no
+# mfmsr directly before it", are all the XDK's trace functions sub_824B4320-sub_824B50F8 and their caller
+# sub_824F63E0: none is called (no bl, no address in the data but .pdata, none built with lis / addi), and they write
+# to a buffer at +688 of the PCR, which the SDK allocates per thread (its end at +692 zero: nothing written).
+skip_msr = true
 
 [functions]
 # The functions that call setjmp keep their registers in the context (share_registers): the host longjmp returns into
@@ -58,6 +70,10 @@ registers = ["r3", "r11"]
 address = 0x822C3758   # cmplw cr6,r11,r10 (sub_822C36A0: while (frames[24] == frames[20]) {}, waiting for the render thread)
 name = "GHAerosmithRenderWaitHook"
 registers = ["r11", "r10"]
+# The main thread's frames measured at their end (src/framerate.cpp: the frame rate fixes count by their real length).
+[[midasm_hook]]
+address = 0x822C3760   # addi r1,r1,128 (the end of sub_822C36A0, after its waits for the vertical blank and the render thread)
+name = "GHAerosmithMainFrameHook"
 [[midasm_hook]]
 address = 0x822CE908   # cmpld cr6,r3,r11 (sub_822CE808: until the counter 0x82AE38E0 reaches the next value)
 name = "GHAerosmithVblankWaitHook"
@@ -138,7 +154,7 @@ registers = ["f1"]
 address = 0x82250794   # fmr f1,f31 (sub_82250750, after lfs f31,4640(r11): the world's step, 1/60 s)
 name = "GHAerosmithPhysicsStepHook"
 registers = ["f31"]
-# The loading screen's wheel and wave step each frame: the steps scaled by 60 / the rate.
+# The loading screen's wheel and wave step each frame: each step scaled by 60 times the time since its previous one.
 [[midasm_hook]]
 address = 0x82394A90   # after lfd f31,-11784(r11) (sub_82394968: the loading wheel, f31 = its turn each frame, 0.175 radians)
 name = "GHAerosmithLoadingWheelHook"
@@ -149,7 +165,7 @@ name = "GHAerosmithLoadingWaveHook"
 registers = ["f29"]
 [[midasm_hook]]
 address = 0x82394E68   # fadds f0,f0,f13 (sub_82394BD0's mode 2: the other phase plus its step, f13)
-name = "GHAerosmithLoadingWaveHook"
+name = "GHAerosmithLoadingWave2Hook"
 registers = ["f13"]
 # Button presses polled by scripts (ControllerMake) last one frame: a script whose waits are held above 60 Hz is given
 # the presses of the frames it skipped.
@@ -220,3 +236,22 @@ registers = ["r5", "r6", "r7"]
 address = 0x8227C548   # clrlwi r11,r3,24 (then beq 0x8227C524: return 0)
 name = "GHAerosmithPlayMovieHook"
 registers = ["r1", "r3"]
+
+# D3D's fence stamps written through the physical view (src/fence_stamps.cpp, ghaerosmith_fence_stamps_unwatched): the
+# store skipped when the hook wrote it. The three sites are GH5's / GH Warriors of Rock's instruction for instruction
+# (the fence at +10908 of the device).
+[[midasm_hook]]
+address = 0x824D1100   # stw r11,8(r28) (sub_824D1070, SetStreamSource: the previous vertex buffer), then b 0x824D1158
+name = "GHAerosmithStreamFenceHook"
+registers = ["r11", "r28"]
+jump_address_on_true = 0x824D1158
+[[midasm_hook]]
+address = 0x824D1244   # stw r11,8(r30) (sub_824D1218, SetIndices: the previous index buffer), then b 0x824D129C
+name = "GHAerosmithIndicesFenceHook"
+registers = ["r11", "r30"]
+jump_address_on_true = 0x824D129C
+[[midasm_hook]]
+address = 0x824CE194   # stw r11,8(r27) (sub_824CE078, SetTexture: the sampler's previous texture), then b 0x824CE1EC
+name = "GHAerosmithTextureFenceHook"
+registers = ["r11", "r27"]
+jump_address_on_true = 0x824CE1EC

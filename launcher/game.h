@@ -170,27 +170,28 @@ inline constexpr bool kHasPipelineList = true;
 // --- The keyboard ---
 
 // The Keyboard page's defaults where they are not the SDK's (its "Reset to defaults", and a control the files do not
-// set): keybind_* cvars and their keys, as src/startup.cpp writes them for the game. The keyboard as a controller on the
-// game's own layout: the frets D, F, J, K, L (LT, LB, RB, RT, A; a fret pressed plays its note); the arrows the D-pad
-// (the menus, Star Power in a song); Space Star Power (Back); Enter or L select (A), Backspace back (B); X or P Start;
-// Right Shift the whammy bar (the right stick); the sticks' other keys off, as W A S D, F and K would move them with the
+// set): keybind_* cvars and their keys, as src/startup.cpp writes them for the game. The keyboard as a guitar (the SDK's
+// keyboard_guitar_layout = "gh3"; GameKeyboardControlsFor): the frets D, F, J, K, L (A, B, Y, X, LB), green selecting and
+// red going back in the menus, and in a song on the game's controller layout (a fret pressed plays its note); the
+// arrows the D-pad (the menus); Space or Backspace Star Power (Back); Enter or X Start; the right arrow the whammy bar
+// (the right stick); the triggers, RB and the sticks' other keys off, as W A S D, F and K would move them with the
 // frets. Empty: the SDK's (game_types.h's KeyDefault).
 inline constexpr std::array<KeyDefault, 23> kKeyboardDefaults{{
-    {"keybind_left_trigger", "D"},
-    {"keybind_left_shoulder", "F"},
-    {"keybind_right_shoulder", "J"},
-    {"keybind_right_trigger", "K"},
-    {"keybind_a", "L,Return"},
-    {"keybind_b", "Backspace"},
-    {"keybind_y", ""},
-    {"keybind_x", ""},
+    {"keybind_left_trigger", ""},
+    {"keybind_left_shoulder", "L"},
+    {"keybind_right_shoulder", ""},
+    {"keybind_right_trigger", ""},
+    {"keybind_a", "D"},
+    {"keybind_b", "F"},
+    {"keybind_y", "J"},
+    {"keybind_x", "K"},
     {"keybind_dpad_up", "Up"},
     {"keybind_dpad_down", "Down"},
-    {"keybind_dpad_left", "Left"},
-    {"keybind_dpad_right", "Right"},
-    {"keybind_back", "Space"},
-    {"keybind_start", "X,P"},
-    {"keybind_rstick_right", "RShift"},
+    {"keybind_dpad_left", "Shift+Left"},
+    {"keybind_dpad_right", "Shift+Right"},
+    {"keybind_back", "Space,Backspace"},
+    {"keybind_start", "Return,X"},
+    {"keybind_rstick_right", "Right"},
     {"keybind_rstick_up", ""},
     {"keybind_rstick_down", ""},
     {"keybind_rstick_left", ""},
@@ -201,10 +202,11 @@ inline constexpr std::array<KeyDefault, 23> kKeyboardDefaults{{
     {"keybind_lstick_right", ""},
 }};
 // The Keyboard page's switch that makes the keyboard's frets strum as they are pressed (the SDK's mnk_tap_target): none,
-// a fret pressed already plays its note on the game's controller layout.
+// a fret key pressed already plays its note in a song (the game's controller layout, keyboard_guitar_layout = "gh3").
 inline constexpr const char* kKeyboardTapTarget = "";
 // A real guitar's controls apart from a controller's (launcher 3.21.2): a guitar plays on its frets (A, B, Y, X, LB,
-// GameGuitarControlsFor), a controller and the keyboard on the game's controller layout (GameControlsFor).
+// GameGuitarControlsFor), a controller on the game's controller layout (GameControlsFor), the keyboard as a guitar in
+// the menus and on that layout in a song (GameKeyboardControlsFor, launcher 3.33.2).
 inline constexpr bool kGuitarControlsApart = true;
 // The whammy bar's row on each controller playing guitar (page_controls.cpp, RecompLauncher 3.4): how far the game
 // reads the bar, and its calibration (the SDK's gamepad_whammy_calibration, recomp change 60). False: no such row (a

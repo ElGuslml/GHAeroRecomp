@@ -113,6 +113,17 @@ audio_wasapi_exclusive_queue = 2
 # display following the game).
 native_x_renderer_present_mode = "vsync"
 vblank_follows_display = true
+# V-Sync in a window that does not cover its display (NativeXRenderer D182; GH Warriors of Rock's and GH5's setting):
+# MAILBOX there, the compositor or a display plane showing one whole picture a refresh. Measured in GH WoR at 160 FPS
+# in a 1280x720 window on a display plane: every frame shown, the shown frames' 1 % low 158.3-158.7 FPS (FIFO
+# 151.6-158.6) and 2.6-3.1 ms from present to display (FIFO 2.4-6.2, by its phase). Borderless and full screen keep
+# FIFO (MAILBOX there: 10.4 ms to the display against 4.0). "vsync" = FIFO in a window too.
+native_x_renderer_window_present_mode = "mailbox"
+# NativeXRenderer records its DiligentCore calls on a thread of their own while its renderer's thread prepares the next
+# commands (D154, D155), on as in GH Warriors of Rock and GH5 (GH WoR's Quest song at 3440x1440: at 240 FPS every
+# stretch at 230 or more, 225.7 without it). With V-Sync, D172 drops one frame when the display's queue stays a frame
+# too deep. false = one thread.
+native_x_renderer_record_thread = true
 # Where the vertical blank runs on the SDK's timer (a G-Sync / FreeSync display, V-Sync off): its ticks within a few
 # microseconds of their time (700 us of spinning each; without, up to half a millisecond late), as the display shows
 # each frame when it comes.
@@ -141,26 +152,34 @@ signin_ui_cancel = true
 # does not ask them to sign in, with no saves or settings of their own. The controller that presses a
 # button at the title screen is the profile's (ghaerosmith_profile_follows_press, src/players.cpp).
 signin_guests = true
-# The keyboard as a controller (with mnk_mode; GH Aerosmith Launcher's Keyboard page changes them), on the game's
-# controller layout: the frets on D, F, J, K and L (green, red, yellow, blue, orange: LT, LB, RB, RT, A), a fret
-# pressed plays its note; the arrows the D-pad (the menus, and Star Power in a song); Star Power also on Space (Back);
-# Enter or L selects in the menus (A), Backspace goes back (B); Start on X or P; the whammy bar on Right Shift (the
-# right stick). The sticks' other keys are off: W A S D, F and K would move them with the frets.
-keybind_left_trigger = "D"
-keybind_left_shoulder = "F"
-keybind_right_shoulder = "J"
-keybind_right_trigger = "K"
-keybind_a = "L,Return"
-keybind_b = "Backspace"
-keybind_y = ""
-keybind_x = ""
+# The keyboard plays as a guitar in the menus and on Guitar Hero III's controller layout in a song (SDK change 126,
+# keyboard_guitar_layout = "gh3" for a keyboard the game is told is a gamepad; GH5's keyboard): in the menus the fret
+# keys are a guitar's (green selects, red goes back), in a song (the tap gate open, src/keyboard.cpp) the SDK gives the
+# game the green, red, yellow, blue and orange keys (A, B, Y, X and LB below) on LT, LB, RB, RT and A, where this game's
+# controller code reads its frets: a fret key pressed plays, no strum (the arrows do nothing there), Star Power on
+# Back's keys, the whammy bar on the right stick's key. Empty: the keys below are a plain controller's everywhere (D on
+# A: the orange fret in a song).
+keyboard_guitar_layout = "gh3"
+# The keyboard as a guitar (with mnk_mode; GH Aerosmith Launcher's Keyboard page changes them), as in GH5 and GH
+# Metallica: the frets on D, F, J, K and L (green, red, yellow, blue, orange: A, B, Y, X, LB); in the menus D selects,
+# F goes back and the arrows move; Star Power on Space or Backspace (Back); Start on Enter or X; the whammy bar on the
+# right arrow (the right stick). The triggers, RB and the sticks' other keys are off: W A S D, F and K would move the
+# sticks with the frets.
+keybind_left_trigger = ""
+keybind_left_shoulder = "L"
+keybind_right_shoulder = ""
+keybind_right_trigger = ""
+keybind_a = "D"
+keybind_b = "F"
+keybind_y = "J"
+keybind_x = "K"
 keybind_dpad_up = "Up"
 keybind_dpad_down = "Down"
-keybind_dpad_left = "Left"
-keybind_dpad_right = "Right"
-keybind_back = "Space"
-keybind_start = "X,P"
-keybind_rstick_right = "RShift"
+keybind_dpad_left = "Shift+Left"
+keybind_dpad_right = "Shift+Right"
+keybind_back = "Space,Backspace"
+keybind_start = "Return,X"
+keybind_rstick_right = "Right"
 keybind_rstick_up = ""
 keybind_rstick_down = ""
 keybind_rstick_left = ""
@@ -276,16 +295,23 @@ struct ChangedDefault {
   const char* old_value;
 };
 constexpr ChangedDefault kChangedDefaults[] = {
-    // 2026-11-13: controllers and the keyboard on the game's own controller layout (gamepad_subtype 7 -> 0).
+    // 2026-11-13: controllers on the game's own controller layout (gamepad_subtype 7 -> 0).
     {"gamepad_subtype", "7"},
-    {"keybind_a", "\"D\""},
-    {"keybind_b", "\"F\""},
-    {"keybind_y", "\"J\""},
-    {"keybind_x", "\"K\""},
-    {"keybind_left_shoulder", "\"L\""},
-    {"keybind_back", "\"Space,Backspace\""},
-    {"keybind_start", "\"Return,X\""},
-    {"keybind_rstick_right", "\"Right\""},
+    // 2026-11-24: the keyboard back on a guitar's keys (keyboard_guitar_layout = "gh3"), from the controller layout of
+    // 2026-11-13, whose D (LT) the menus did not take. The keys before 2026-11-13 were a guitar's already.
+    {"keybind_left_trigger", "\"D\""},
+    {"keybind_left_shoulder", "\"F\""},
+    {"keybind_right_shoulder", "\"J\""},
+    {"keybind_right_trigger", "\"K\""},
+    {"keybind_a", "\"L,Return\""},
+    {"keybind_b", "\"Backspace\""},
+    {"keybind_y", "\"\""},
+    {"keybind_x", "\"\""},
+    {"keybind_dpad_left", "\"Left\""},
+    {"keybind_dpad_right", "\"Right\""},
+    {"keybind_back", "\"Space\""},
+    {"keybind_start", "\"X,P\""},
+    {"keybind_rstick_right", "\"RShift\""},
 };
 
 // The lines of `text` split at '\n' (a last piece without one included; joined back with '\n', the text again).

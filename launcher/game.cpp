@@ -175,7 +175,7 @@ struct PadWords {
   const char* right_stick;
 };
 
-// The game's controller layout (src/startup.cpp's gamepad_subtype = 0; a controller and the keyboard): the frets on LT,
+// The game's controller layout (src/startup.cpp's gamepad_subtype = 0; a controller): the frets on LT,
 // LB, RB, RT and A, a fret pressed plays its note (no strum); the whammy bar on either stick (listed on the right one);
 // Star Power on Back and on the D-pad, which moves in the menus; A selects there, B goes back.
 std::vector<GameControlGroup> Pad(const ControlWords& g, const PadWords& w) {
@@ -203,7 +203,92 @@ std::vector<GameControlGroup> Pad(const ControlWords& g, const PadWords& w) {
   };
 }
 
+// One language's words for the keyboard's functions.
+struct KeyWords {
+  const char* frets;
+  const char* effects;
+  const char* menus;
+  const char* green;
+  const char* red;
+  const char* menu_up;
+  const char* menu_down;
+};
+
+// The keyboard (src/startup.cpp's keyboard_guitar_layout = "gh3", the SDK's change 126): a guitar's keys in the menus,
+// the frets on A, B, Y, X and LB (green selects, red goes back, the D-pad moves); in a song the SDK gives the game those
+// keys on its controller layout, so a fret key pressed plays (no strum: the D-pad does nothing there), Star Power on
+// Back, the whammy bar on the right stick.
+std::vector<GameControlGroup> Keyboard(const ControlWords& g, const KeyWords& w) {
+  return {
+      {w.frets,
+       {
+           {int(Bind::kA), "", kGreen, kOnFret, w.green},
+           {int(Bind::kB), "", kRed, kOnFret, w.red},
+           {int(Bind::kY), "", kYellow, kOnFret, g.yellow},
+           {int(Bind::kX), "", kBlue, kOnFret, g.blue},
+           {int(Bind::kLeftShoulder), "", kOrange, kOnFret, g.orange},
+       }},
+      {w.effects,
+       {
+           {int(Bind::kRStickRight), g.whammy_chip, kGrey, kOnGrey, g.whammy, g.right_stick},
+           {int(Bind::kBack), "SP", kGrey, kOnStarPower, "Star Power"},
+       }},
+      {w.menus,
+       {
+           {int(Bind::kDpadUp), "â", kGrey, kOnGrey, w.menu_up, g.dpad_up},
+           {int(Bind::kDpadDown), "â", kGrey, kOnGrey, w.menu_down, g.dpad_down},
+           {int(Bind::kStart), "START", kGrey, kOnGrey, "Start"},
+       }},
+  };
+}
+
 }  // namespace
+
+const std::vector<GameControlGroup>& GameKeyboardControlsFor(uint32_t language) {
+  static const ControlWords kEnglishWords{"", "", "", "", "", "Yellow fret", "Blue fret", "Orange fret", "", "",
+                                          "Whammy bar", "WHAM", "D-pad up", "D-pad down", "Right stick"};
+  static const ControlWords kGermanWords{"", "", "", "", "", "Gelber Bund", "Blauer Bund", "Oranger Bund", "", "",
+                                         "Whammy-Hebel", "WHAM", "Steuerkreuz hoch", "Steuerkreuz runter",
+                                         "Rechter Stick"};
+  static const ControlWords kFrenchWords{"", "", "", "", "", "Frette jaune", "Frette bleue", "Frette orange", "", "",
+                                         "Levier de vibrato", "VIBR", "Croix haut", "Croix bas", "Stick droit"};
+  static const ControlWords kSpanishWords{"", "", "", "", "", "Traste amarillo", "Traste azul", "Traste naranja", "",
+                                          "", "Palanca de trémolo", "TRÉM", "Cruceta arriba", "Cruceta abajo",
+                                          "Stick derecho"};
+  static const ControlWords kItalianWords{"", "", "", "", "", "Tasto giallo", "Tasto blu", "Tasto arancione", "", "",
+                                          "Leva del vibrato", "VIBR", "Croce su", "Croce giù", "Levetta destra"};
+  static const std::vector<GameControlGroup> kEnglish = Keyboard(
+      kEnglishWords, {"Keyboard Â· Frets (a press plays the note)", "Keyboard Â· Whammy and Star Power",
+                      "Menus", "Green fret Â· Select", "Red fret Â· Back", "Menu up", "Menu down"});
+  static const std::vector<GameControlGroup> kGerman = Keyboard(
+      kGermanWords, {"Tastatur Â· Bünde (Drücken spielt die Note)", "Tastatur Â· Whammy und Star Power",
+                     "Menüs", "Grüner Bund Â· Auswählen", "Roter Bund Â· Zurück", "Menü hoch",
+                     "Menü runter"});
+  static const std::vector<GameControlGroup> kFrench = Keyboard(
+      kFrenchWords, {"Clavier Â· Frettes (appuyer joue la note)", "Clavier Â· Vibrato et Star Power",
+                     "Menus", "Frette verte Â· Choisir", "Frette rouge Â· Retour", "Menu haut",
+                     "Menu bas"});
+  static const std::vector<GameControlGroup> kSpanish = Keyboard(
+      kSpanishWords, {"Teclado Â· Trastes (pulsar toca la nota)", "Teclado Â· Trémolo y Star Power",
+                      "Menús", "Traste verde Â· Seleccionar", "Traste rojo Â· Atrás", "Menú arriba",
+                      "Menú abajo"});
+  static const std::vector<GameControlGroup> kItalian = Keyboard(
+      kItalianWords, {"Tastiera Â· Tasti (premere suona la nota)", "Tastiera Â· Vibrato e Star Power",
+                      "Menu", "Tasto verde Â· Seleziona", "Tasto rosso Â· Indietro", "Menu su",
+                      "Menu giù"});
+  switch (language) {
+    case 3:
+      return kGerman;
+    case 4:
+      return kFrench;
+    case 5:
+      return kSpanish;
+    case 6:
+      return kItalian;
+    default:
+      return kEnglish;
+  }
+}
 
 const std::vector<GameControlGroup>& GameGuitarControlsFor(uint32_t language) {
   static const std::vector<GameControlGroup> kEnglish = Guitar({

@@ -1,12 +1,12 @@
-// ghaerosmith - the keyboard's strum on each fret, only in a song.
+// ghaerosmith - the keyboard's song mark: where a song runs.
 //
-// With mnk_tap_target = "dpad_down" (GH Aerosmith Launcher's switch on the Keyboard page; src/startup.cpp sets the
-// frets as mnk_tap_sources) the SDK's keyboard pad presses the D-pad, a strum, when a fret key is pressed, the frets
-// pressed within mnk_tap_window_ms of each other making one chord. The menus move their cursor with the D-pad, so
-// every fret pressed to confirm (green) or go back (red) would move it too: the strum is allowed only while a song
-// runs. A player's guitar logic in a song (the script function GuitarInputLogicPerFrame, sub_821235E0, every frame
-// for each player from script 0x057C9B84's loop) marks the time; the gate is open while that mark is recent. As in
-// GH Metallica (GHMetalRecomp's src/keyboard.cpp).
+// The SDK asks the game's tap gate (rex::input::mnk::SetTapGate) whether a song runs. With keyboard_guitar_layout =
+// "gh3" (src/startup.cpp; SDK change 126) the keyboard plays as a guitar in the menus (green selects, red goes back,
+// the arrows move) and, while the gate is open, gives the game its fret keys on Guitar Hero III's controller layout
+// (LT, LB, RB, RT, A), where this game's controller code reads them. With mnk_tap_target = "dpad_down" (off here) the
+// keyboard's pad would also strum on each fret key pressed while it is open. A player's guitar logic in a song (the
+// script function GuitarInputLogicPerFrame, sub_821235E0, every frame for each player from script 0x057C9B84's loop)
+// marks the time; the gate is open while that mark is recent. As in GH Metallica (GHMetalRecomp's src/keyboard.cpp).
 
 #include "keyboard.h"
 

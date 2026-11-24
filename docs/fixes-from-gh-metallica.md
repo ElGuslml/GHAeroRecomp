@@ -74,9 +74,10 @@ its guests (`signin_guests`, `src/players.cpp`, the title screen found by the qu
 
 ## The keyboard
 
-The keyboard as a guitar (`mnk_mode`): frets D F J K L, strum the arrow keys, Star Power Space; GH Aerosmith Launcher's
-Keyboard page changes them. Its switch to strum on each fret (`mnk_tap_target = "dpad_down"`) is active only in a song
-(`src/keyboard.cpp`, a hook at `GuitarInputLogicPerFrame`, `sub_821235E0`).
+The keyboard as a guitar (`mnk_mode`): frets D F J K L, Star Power Space; GH Aerosmith Launcher's Keyboard page changes
+them. A song is told apart by a hook at `GuitarInputLogicPerFrame` (`sub_821235E0`, `src/keyboard.cpp`). Since
+2026-11-24 the keyboard plays a song on the game's own controller layout (no strum) and keeps a guitar's keys in the
+menus: [The keyboard](keyboard.md).
 
 ## Frame rates above 60
 
@@ -96,8 +97,12 @@ songs keep their speed. What counts frames is corrected by `src/framerate.cpp` (
 - star_power_whammy, a script here (C++ in GH Metallica): the bar's movement and its 5-pass countdowns as at 60, and
   star power grown by the time since its previous pass.
 - The button presses the held scripts poll (ControllerMake) are given to them from the frames they skip.
-- The loading screen's wheel (the boot's) turns 0.175 radians a frame, and its wave mode moves by a step a frame: both
-  scaled by 60 / the rate (GH Metallica's star).
+- The loading screen's wheel (the boot's) turns 0.175 radians a frame, and its wave mode moves by a step a frame: each
+  step scaled by 60 times the time since its previous one (GH Metallica's star).
+- These count by the frames' real length (2026-11-24, GH5's): the margins that pick the frame a script wait ends in and
+  the window of presses given to held scripts use the main thread's frames as measured at their end (`sub_822C36A0`,
+  hook `0x822C3760`: an average of about ten frames), not 1 / the chosen rate, so they keep the console's speed when
+  the game runs below its rate. Checked with a temporary probe: 6.252 ms at 160, 4.167 ms at 240.
 - The hair, the clothes and the guitar cables (Havok physics; not in GH Metallica): the world is stepped by a fixed
   1/60 s each frame (`sub_82250750`), while the bodies that follow the animated bones are given a velocity to reach their
   targets in the frame's time (`applyHardKeyFrame`, `sub_82697090`). At 160 FPS each step carried them 2.67 times as
