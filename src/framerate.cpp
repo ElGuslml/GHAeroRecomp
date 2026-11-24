@@ -38,7 +38,9 @@
 #include <utility>
 
 REXCVAR_DEFINE_INT32(ghaerosmith_frame_rate, 60, "GHAerosmith",
-                     "Frame rate: 60 as on the console, or 120, 144, 160, 165 or 240: the emulated vertical blank runs "
+                     "Frame rate: 60 as on the console, or 72, 75, 90, 100, 120, 144, 160, 165 or 240, or with "
+                     "V-Sync off 300, 360, 480 or 1000 (experimental; the launcher's Unlimited): the emulated "
+                     "vertical blank runs "
                      "at that rate (video_mode_refresh_rate, set at startup) and the game presents on every one; its "
                      "clock is real time, so it keeps its speed");
 
@@ -57,8 +59,9 @@ double VblankRate() {
   const auto now = std::chrono::steady_clock::now();
   if (read == std::chrono::steady_clock::time_point{} || now - read > std::chrono::seconds(1)) {
     read = now;
-    rate = rex::cvar::Query<bool>("vsync") ? std::clamp(rex::cvar::Query<double>("video_mode_refresh_rate"), 24.0, 240.0)
-                                           : 1000.0;
+    rate = rex::cvar::Query<bool>("vsync")
+               ? std::clamp(rex::cvar::Query<double>("video_mode_refresh_rate"), 24.0, 1000.0)
+               : 1000.0;
   }
   return rate;
 }
@@ -342,7 +345,9 @@ void GHAerosmithDeltaTimeHook(PPCRegister& f1) {
 // pressed bits while its ControllerMake runs, then the bits are put back.
 namespace {
 
-constexpr int kKeptUpdates = 8;
+// Enough for the updates between two runs of a script held to 60 a second at up to 1000 frames a second (16); with
+// 8, presses were lost above about 480 (GH Warriors of Rock's, GH5's a70246b).
+constexpr int kKeptUpdates = 32;
 
 struct InputUpdates {
   uint32_t state = 0;  // the input state's guest address

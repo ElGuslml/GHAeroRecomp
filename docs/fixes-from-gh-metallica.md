@@ -81,9 +81,13 @@ menus: [The keyboard](keyboard.md).
 
 ## Frame rates above 60
 
-**Experimental.** `ghaerosmith_frame_rate` (60, 120, 144, 160, 165, 240; the launcher's frame rate row) sets the
-refresh rate the game paces itself by; its clock is real time (the frame's length is measured, `sub_82176050`), so the
-songs keep their speed. What counts frames is corrected by `src/framerate.cpp` (`ghaerosmith_frame_rate_fix`):
+**Experimental.** `ghaerosmith_frame_rate` (60, 72, 75, 90, 100, 120, 144, 160, 165, 240, and with V-Sync off 300,
+360, 480 or 1000, the launcher's Unlimited; its frame rate row) sets the refresh rate the game paces itself by; with
+V-Sync on, a rate above the display's runs at the display's (`src/options.cpp`). Its clock is real time (the frame's
+length is measured, `sub_82176050`), so the songs keep their speed: the song's time is the sum of the frames' `mftb`
+intervals and keeps the host's clock (within 1.6 ms over a minute at 480 FPS with V-Sync off). Above 240 the presses
+kept for held scripts reach a 60th of a second at 1000 FPS (32), and the render thread's predicted vertical blank
+sleep shrinks with the period above 250 Hz (`src/thread_waits.cpp`), as GH5's. What counts frames is corrected by `src/framerate.cpp` (`ghaerosmith_frame_rate_fix`):
 - The scripts' `Wait N gameframes` (249 scripts) last the console's N / 60 s, as in GH Metallica, but this engine runs
   much of its per-frame logic from scripts that wait one game frame in a loop (the guitar's input, star power's
   activation and drain, the note holds, the score, the iterators, the movies, the menus that poll the controllers):
