@@ -1,0 +1,222 @@
+# ghaerosmith_functions.toml - Manual corrections for the analyzer (default.xex): functions it missed, [[switch_tables]] the
+# codegen mistranslates and [[midasm_hook]]s into src/. KameoRecomp's kameo_functions.toml, POTCAWERecomp's
+# potcawe_functions.toml and GRAWRecomp's yeti_functions.toml have examples of each.
+
+# The C runtime's setjmp and longjmp (sub_82795FD0 and sub_82795B80, GH Metallica's sub_8252F5B0 and sub_8252EF50
+# instruction for instruction). The codegen turns calls to them into the host's setjmp and longjmp, keyed by the guest
+# jmp_buf; translated as plain functions, longjmp would load the registers and return to its caller instead of jumping.
+# Only the image decoders use them: six functions call setjmp (sub_82516A68, sub_82516D98 libjpeg's guard as GH's
+# sub_821DF7E0, sub_82517A48 and sub_82536988 libpng's as GH's sub_821DFA00 and sub_821F3028, sub_82517C40,
+# sub_82536F20), and their error functions longjmp back (sub_82513CD8, sub_82530640, sub_82530690 and three tail-call
+# thunks).
+setjmp_address = 0x82795FD0
+longjmp_address = 0x82795B80
+
+# Codegen: the registers no call passes on are local variables of each function, not fields of the PPCContext, so the
+# compiler keeps them in host registers and the __savegprlr/__restgprlr helpers are elided, as in GH Metallica.
+# non_argument_as_local (r0, r2, r11, r12) stays off: the SEH funclets read r12, which the SDK does not pass them. The
+# non-volatile vector registers stay in the context (SDK change 42): GH Metallica's compiler passes values to its
+# callees in them, outside the calling convention.
+non_volatile_as_local = true
+non_volatile_vectors_as_local = false
+cr_as_local = true
+ctr_as_local = true
+xer_as_local = true
+reserved_as_local = true
+
+[functions]
+# The functions that call setjmp keep their registers in the context (share_registers): the host longjmp returns into
+# their C++ frame, and the codegen restores the context it saved at the setjmp, not local variables. None of them calls
+# longjmp itself.
+0x82516A68 = { share_registers = true }
+0x82516D98 = { share_registers = true }   # libjpeg's guard
+0x82517A48 = { share_registers = true }   # libpng's guards
+0x82517C40 = { share_registers = true }
+0x82536988 = { share_registers = true }
+0x82536F20 = { share_registers = true }
+# Branch (b) targets the analyzer could not follow (the first build, 2026-10-27): functions reached only by tail calls.
+0x8211C760 = {}   # a leaf with no prologue after 0x8211C71C's tail call; 0x8211C910 branches into its loop (0x8211C81C)
+0x8233B948 = {}   # branched to from 0x82267994 (virtual call thunk, slot 100)
+0x8233B958 = {}   # branched to from 0x822679AC (virtual call thunk, slot 104)
+0x8233B968 = {}   # branched to from 0x822679C4 (virtual call thunk, slot 108)
+0x8233BA28 = {}   # branched to from 0x82267D14 (virtual call thunk, slot 156)
+0x82340B40 = {}   # branched to from 0x821CC6AC and 0x821CC6C8 (sets the byte at +241)
+0x82365BC8 = {}   # branched to from 0x82237BD8 (a null check, then b 0x8241C318)
+0x827A71C8 = {}   # branched to from 0x827A8024 (addi r3,r3,4; b 0x827A4E88: an adjusted-this thunk)
+0x827B1C40 = {}   # branched to from 0x827B2094 (addi r3,r3,4; b 0x827A4E88: an adjusted-this thunk)
+
+# The game's threads wait without spinning (src/thread_waits.cpp): the main thread at the end of a frame (the vertical
+# blank, then the render thread) and the render thread presenting a frame (two vertical blank counters) checked their
+# condition again and again and kept a core at 100 % each. Each hook spins briefly and then sleeps between checks;
+# ghaerosmith_wait_sleep_us = 0 disables them. With ghaerosmith_wait_smart (on) the vertical blank waits sleep until
+# shortly before the vertical blank.
+[[midasm_hook]]
+address = 0x822C3738   # cmpld cr6,r3,r11 (sub_822C36A0: until the vertical blank counter reaches the frame's last vertical blank)
+name = "GHAerosmithFrameVblankWaitHook"
+registers = ["r3", "r11"]
+[[midasm_hook]]
+address = 0x822C3758   # cmplw cr6,r11,r10 (sub_822C36A0: while (frames[24] == frames[20]) {}, waiting for the render thread)
+name = "GHAerosmithRenderWaitHook"
+registers = ["r11", "r10"]
+[[midasm_hook]]
+address = 0x822CE908   # cmpld cr6,r3,r11 (sub_822CE808: until the counter 0x82AE38E0 reaches the next value)
+name = "GHAerosmithVblankWaitHook"
+registers = ["r3", "r11"]
+[[midasm_hook]]
+address = 0x822CEA30   # cmpld cr6,r3,r11 (sub_822CE808: until the vertical blank counter reaches the frame's last vertical blank)
+name = "GHAerosmithVblankWait2Hook"
+registers = ["r3", "r11"]
+# The game's two callbacks advance the counters those loops wait on: an event set right after each advance wakes the
+# waiting threads at once (src/thread_waits.cpp; GH Metallica's of 2026-11-04, for G-Sync / FreeSync displays).
+[[midasm_hook]]
+address = 0x82175C10   # ld r10,0(r9) (sub_82175BF0, the swap callback: after the swap counter 0x82AE38E0's advance)
+name = "GHAerosmithSwapSignalHook"
+[[midasm_hook]]
+address = 0x82175BC8   # mftb r10 (sub_82175B98, the vertical blank callback: after the counter 0x82AE38D8's advance)
+name = "GHAerosmithVblankSignalHook"
+# The D3D library's ten waits for the GPU (fences, the present, ...) call sub_824DCC98 for every check.
+[[midasm_hook]]
+address = 0x824DCC98   # mflr r12 (entry of sub_824DCC98: a check of a wait for the GPU, its condition still false)
+name = "GHAerosmithGpuWaitHook"
+
+# Songs in sync with their audio (src/timer.cpp): the engine's timer replaces the 50,000,000 Hz that
+# KeQueryPerformanceFrequency reports by the original console's real timebase rate, 49,875,000; the SDK's timebase
+# runs at 50 MHz, so the game's clock would run 0.25 % fast and the notes drift ahead of the audio.
+# ghaerosmith_timer_fix = false disables it.
+[[midasm_hook]]
+address = 0x82175F7C   # cmplw cr6,r11,r10 (sub_82175EE0: r11 = the reported frequency, r10 = 50,000,000)
+name = "GHAerosmithTimerFrequencyHook"
+registers = ["r10"]
+
+# The crowd's claps on star power follow the calibration (src/crowd.cpp): the fretbar handler 0x5E4AD8C0 waits 0.18 s
+# and claps, its fretbar events registered late by the audio and video calibration.
+[[midasm_hook]]
+address = 0x82116CB4   # stw r11,24(r31) (fretbar_iterator_CFunc sub_82116B20 setting up: r11 = the script it spawns, r31 = its state, the offset at +20)
+name = "GHAerosmithFretbarIteratorHook"
+registers = ["r11", "r31"]
+[[midasm_hook]]
+address = 0x8225FF60   # bne cr6 (sub_8225FD10, the script function Wait, its seconds branch): r4 = the wait in ms, r30 = the script
+name = "GHAerosmithCrowdBeatWaitHook"
+registers = ["r4", "r30"]
+
+# Quitting from the title screen and the main menu (src/quit_prompt.cpp): once per frame, the hook looks the screens'
+# own elements up in the game's element table and offers the SDK's quit prompt (B) while one exists.
+[[midasm_hook]]
+address = 0x822C36A0   # mflr r12 (entry of sub_822C36A0, the end of the main thread's frame)
+name = "GHAerosmithQuitPromptHook"
+# Frame rates above 60 (src/framerate.cpp, ghaerosmith_frame_rate_fix). Script waits counted in game frames
+# ("Wait N gameframes"): above 60 Hz they last the console's N / 60 s, but those of the scripts that run the game's
+# per-frame logic.
+[[midasm_hook]]
+address = 0x82323548   # entry of sub_82323548 (a type 1 game-frame wait set: r3 = the wait, r4 = N)
+name = "GHAerosmithFrameWaitSetHook"
+registers = ["r3", "r4"]
+[[midasm_hook]]
+address = 0x823234F8   # entry of sub_823234F8 (a type 8 game-frame wait set: r3 = the wait, r4 = N)
+name = "GHAerosmithFrameWaitSetHook"
+registers = ["r3", "r4"]
+[[midasm_hook]]
+address = 0x823238E0   # addi r11,r11,-1 (sub_82323888: a game-frame wait's count above 0, r3 = the wait)
+name = "GHAerosmithFrameWaitCountHook"
+registers = ["r3", "r11"]
+[[midasm_hook]]
+address = 0x823238EC   # b sub_823232B0 (sub_82323888: a type 1 game-frame wait ends, the script runs on, r3 = the wait)
+name = "GHAerosmithFrameWaitEndHook"
+registers = ["r3"]
+# The frame's time a held script asks for (GetDeltaTime) is the time since its previous pass.
+[[midasm_hook]]
+address = 0x8219A0DC   # mr r31,r4 (sub_8219A0C8, the script function GetDeltaTime: r4 = the script)
+name = "GHAerosmithDeltaTimeScriptHook"
+registers = ["r4"]
+[[midasm_hook]]
+address = 0x8219A128   # bl sub_82147E98 (sub_8219A0C8: delta_time stored in the script's locals, f1 = the time)
+name = "GHAerosmithDeltaTimeHook"
+registers = ["f1"]
+# Havok's world is stepped by a fixed 1/60 s each frame while the keyframed bodies (the hair's and the cables' roots)
+# move by the frame's time: above 60 Hz it is stepped by the frame's time.
+[[midasm_hook]]
+address = 0x82250794   # fmr f1,f31 (sub_82250750, after lfs f31,4640(r11): the world's step, 1/60 s)
+name = "GHAerosmithPhysicsStepHook"
+registers = ["f31"]
+# The loading screen's wheel and wave step each frame: the steps scaled by 60 / the rate.
+[[midasm_hook]]
+address = 0x82394A90   # after lfd f31,-11784(r11) (sub_82394968: the loading wheel, f31 = its turn each frame, 0.175 radians)
+name = "GHAerosmithLoadingWheelHook"
+registers = ["f31"]
+[[midasm_hook]]
+address = 0x82394E58   # fadds f0,f0,f29 (sub_82394BD0's mode 2: a wave's phase plus its step, f29)
+name = "GHAerosmithLoadingWaveHook"
+registers = ["f29"]
+[[midasm_hook]]
+address = 0x82394E68   # fadds f0,f0,f13 (sub_82394BD0's mode 2: the other phase plus its step, f13)
+name = "GHAerosmithLoadingWaveHook"
+registers = ["f13"]
+# Button presses polled by scripts (ControllerMake) last one frame: a script whose waits are held above 60 Hz is given
+# the presses of the frames it skipped.
+[[midasm_hook]]
+address = 0x82230BCC   # bgt cr6 (sub_82230A08: a controller's input state updated, r30 = the state, r11 = the pressed bits)
+name = "GHAerosmithInputUpdateHook"
+registers = ["r30", "r11"]
+[[midasm_hook]]
+address = 0x82283AF8   # entry of sub_82283AF8 (the script function ControllerMake: r4 = the script)
+name = "GHAerosmithButtonPollHook"
+registers = ["r4"]
+[[midasm_hook]]
+address = 0x82283B7C   # addi r1,r1,128 (sub_82283AF8's exit, the controller given)
+name = "GHAerosmithButtonPollEndHook"
+[[midasm_hook]]
+address = 0x82283BB4   # addi r1,r1,128 (sub_82283AF8's exit, no controller has the button)
+name = "GHAerosmithButtonPollEndHook"
+[[midasm_hook]]
+address = 0x82283BC0   # addi r1,r1,128 (sub_82283AF8's exit, a controller has the button)
+name = "GHAerosmithButtonPollEndHook"
+# The keyboard's strum on each fret (src/keyboard.cpp): allowed only while a song runs, marked by the players' guitar
+# logic each frame.
+[[midasm_hook]]
+address = 0x821235E0   # mflr r12 (entry of sub_821235E0, the script function GuitarInputLogicPerFrame: a player's guitar in a song)
+name = "GHAerosmithSongFrameHook"
+
+# Ultrawide (src/widescreen.cpp), with ghaerosmith_ultrawide: the projection of every 16:9 view is widened (Hor+: the
+# 3D views see more at the sides), and the screen elements' vertices (pixels of the 1280x720 back buffer) are narrowed
+# around the center just before they are drawn to the screen (the menus, the HUD, the note highway, its gems and their
+# tails stay 16:9), with the clip windows they draw through and the movies. Ported from GH Metallica by role (the
+# engines differ): GH Metallica's particle hook has no counterpart (2D particles are screen elements here), and the
+# loading screen, drawn by itself here, marks a picture for the bars outside a song.
+[[midasm_hook]]
+address = 0x8222F590   # mflr r12 (entry of sub_8222F590, a perspective projection from f1-f4: left, right, bottom, top)
+name = "GHAerosmithFrustumHook"
+registers = ["f1", "f2", "f3", "f4"]
+[[midasm_hook]]
+address = 0x823927D8   # bl DrawVerticesUP in sub_82391800 (a sprite's quad, mesh type 0: r6 = its vertices, r7 = their stride)
+name = "GHAerosmithSpriteHook"
+registers = ["r6", "r7"]
+[[midasm_hook]]
+address = 0x82369DBC   # bl DrawVerticesUP in sub_82369928 (a movie's frame: r6 = its 4 vertices, r7 = their stride)
+name = "GHAerosmithElementQuadHook"
+registers = ["r6", "r7"]
+[[midasm_hook]]
+address = 0x82394E70   # bl sub_82394968 in sub_82394BD0 (the loading screen drawn, every frame it is up)
+name = "GHAerosmithLoadingScreenHook"
+[[midasm_hook]]
+address = 0x8237C1A8   # bl DrawVerticesUP in sub_8237C138 (the text's batch of quads: r5 = vertices, r6 = data, r7 = stride)
+name = "GHAerosmithSpriteBatchHook"
+registers = ["r5", "r6", "r7"]
+[[midasm_hook]]
+address = 0x8238F650   # bl SetScissorRect in sub_8238F4F8 (a screen element's clip window: r4 = {x1, y1, x2, y2})
+name = "GHAerosmithClipWindowHook"
+registers = ["r4"]
+[[midasm_hook]]
+address = 0x8239102C   # bl DrawVerticesUP in sub_82390968 (a sustained note's tail: r5 = vertices, r6 = data, r7 = stride)
+name = "GHAerosmithTailHook"
+registers = ["r5", "r6", "r7"]
+[[midasm_hook]]
+address = 0x82390938   # bl DrawVerticesUP in sub_82390628 (the highway's board, a grid: r5 = vertices, r6 = data, r7 = stride)
+name = "GHAerosmithMeshSpriteHook"
+registers = ["r5", "r6", "r7"]
+
+# The boot's videos skipped (src/intro.cpp, ghaerosmith_skip_intro): PlayMovie (sub_8227C4F0, GH Metallica's code) has
+# read its `movie` string into 84(r1); r3 = found. Not found returns false without playing.
+[[midasm_hook]]
+address = 0x8227C548   # clrlwi r11,r3,24 (then beq 0x8227C524: return 0)
+name = "GHAerosmithPlayMovieHook"
+registers = ["r1", "r3"]
