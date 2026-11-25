@@ -151,18 +151,27 @@ inline constexpr std::array<Language, 5> kLanguages{{
 // titles, hints and help are game.cpp's (GameTexts::toggles and toggle_help, in this order). In Settings > Game >
 // Starting the game (launcher 3.28's kStart), off as on the console: the boot's videos skipped (src/intro.cpp). Then
 // in Settings > Game, off as on the console: the game's debug menu (src/debug_menu.cpp, docs/debug-menu.md).
-inline constexpr std::array<Toggle, 2> kToggles{{
+inline constexpr std::array<Toggle, 3> kToggles{{
     {"ghaerosmith_skip_intro", false, ToggleGroup::kStart},
     {"ghaerosmith_debug_menu", false},
+    {"ghaerosmith_highway_keep_speed", false, ToggleGroup::kModsHighway, "ghaerosmith_highway_perspective"},
 }};
 
-// Rows of the game's own with several values (game_types.h's Choice, launcher 3.29), GH5's: Mods > Highway's look, the
-// note highway's style (the original, or the community's black highway) and its opacity (the venue seen through it),
-// each a change of the game's script data when it starts (src/mods.cpp). Their titles, hints, help and the styles'
-// names are game.cpp's.
+// Rows of the game's own with several values (game_types.h's Choice, launcher 3.29), GH5's: Mods > Highway, the note
+// highway's size with one player (80-120 % by 5), its length in time (the console's highway continued in its own
+// perspective, the notes seen earlier at the same speed: 100, 125, 150, 170 %), its perspective (25-150 % of the
+// console's compression by 25), and its look: the style (the original, or the community's black highway) and the
+// opacity (the venue seen through it). Each a change of the game's script data when it starts (src/mods.cpp). Their
+// titles, hints, help and the styles' names are game.cpp's.
+inline constexpr const char* kHighwayScales[] = {"80", "85", "90", "95", "100", "105", "110", "115", "120"};
+inline constexpr const char* kHighwayLengths[] = {"100", "125", "150", "170"};
+inline constexpr const char* kHighwayPerspectives[] = {"25", "50", "75", "100", "125", "150"};
 inline constexpr const char* kHighwayStyles[] = {"original", "dark"};
 inline constexpr const char* kHighwayOpacities[] = {"100", "90", "80", "70", "60", "50", "40", "30"};
-inline constexpr std::array<Choice, 2> kChoices{{
+inline constexpr std::array<Choice, 5> kChoices{{
+    {"ghaerosmith_highway_scale", kHighwayScales, "100", ToggleGroup::kModsHighway, " %"},
+    {"ghaerosmith_highway_length", kHighwayLengths, "100", ToggleGroup::kModsHighway, " %"},
+    {"ghaerosmith_highway_perspective", kHighwayPerspectives, "100", ToggleGroup::kModsHighway, " %"},
     {"ghaerosmith_highway_style", kHighwayStyles, "original", ToggleGroup::kModsHighwayLook, "", true},
     {"ghaerosmith_highway_opacity", kHighwayOpacities, "100", ToggleGroup::kModsHighwayLook, " %"},
 }};

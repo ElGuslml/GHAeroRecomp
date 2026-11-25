@@ -16,5 +16,5 @@ again in this engine; the investigations are GHMetalRecomp's.
 | [The XDK's atomic operations without a process-wide lock](interlocked-without-lock.md) | Fixed (2026-11-24): `skip_msr`, every site checked; about 16 % less CPU in a song at 160 FPS |
 | [The keyboard](keyboard.md) | Fixed (2026-11-24): a guitar's keys in the menus (D selects), the game's controller layout in a song |
 | [The game's own debug menu](debug-menu.md) | Added (2026-11-24), off by default: Neversoft's debug menu in the main menu and the pause menu, without the development shortcuts that change the save |
-| [Mods](mods.md) | Added (2026-11-24), off by default: the note highway's style (dark) and opacity (the venue seen through it) |
+| [Mods](mods.md) | Added (2026-11-24), off by default: the note highway's scale, length, perspective, style (dark) and opacity (the venue seen through it) |
 | [Pending](pending.md) | What GH Metallica has that this game does not yet, and why: the audio's pacing, the screen effects, a look at G-Sync, each controller's kind, NativeXRenderer checks, online, the release |

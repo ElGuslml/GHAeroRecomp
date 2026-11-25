@@ -201,6 +201,13 @@ ghaerosmith_skip_intro = false
 # menu. The development shortcuts the same switch had (unlocking or completing songs from the setlist, the store's
 # money) stay off. Some items need Neversoft's development tools and do nothing. false = as on the console.
 ghaerosmith_debug_menu = false
+# The note highway (src/mods.cpp): its size with one player, its length in time and its perspective, in percent (100 = as
+# on the console); with a perspective other than 100, keep_speed makes the notes reach the strike line at the console's
+# speed.
+ghaerosmith_highway_scale = 100
+ghaerosmith_highway_length = 100
+ghaerosmith_highway_perspective = 100
+ghaerosmith_highway_keep_speed = false
 # The note highway's look (src/mods.cpp): "original", or "dark" (the community's black highway).
 ghaerosmith_highway_style = "original"
 # The note highway's opacity in percent: below 100 the venue shows through it (src/mods.cpp). 100 = as on the console.
