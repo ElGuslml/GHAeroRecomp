@@ -21,7 +21,7 @@
 #define LauncherExe "GH Aerosmith Launcher.exe"
 ; The project's public repository, once there is one ("https://github.com/<user>/GHAeroRecomp"): the links of the
 ; uninstall entry.
-#define RepoUrl ""
+#define RepoUrl "https://github.com/ElGuslml/GHAeroRecomp"
 
 ; The file's version takes numbers alone: 0.2.1 for "0.2.1-beta.1".
 #define FileVersion Copy(AppVersion, 1, Pos("-", AppVersion + "-") - 1)
@@ -113,7 +113,6 @@ Name: "{autodesktop}\{#ShortcutName}"; Filename: "{app}\{#LauncherExe}"; Tasks: 
 ; when the release has its installer and this PC lacks it. Its package installs for the whole PC, so Windows asks for an
 ; administrator's consent; the launcher's Controls page offers it again later.
 Filename: "msiexec.exe"; Parameters: "/i ""{app}\GameInputRedist.msi"" /passive /norestart"; Description: "{cm:InstallGameInput}"; Flags: postinstall skipifsilent waituntilterminated shellexec; Check: NeedsGameInput
-Filename: "{app}\{#LauncherExe}"; Description: "{cm:LaunchProgram,{#ShortcutName}}"; Flags: nowait postinstall skipifsilent
 Filename: "{app}\{#LauncherExe}"; Description: "{cm:LaunchProgram,{#ShortcutName}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]

@@ -7,6 +7,8 @@ Guitar Hero: Aerosmith runs on Guitar Hero III's engine (its executable is `gh3_
 Hero: Metallica's. Many of GH Metallica's problems are here too: GHMetalRecomp's fixes were ported, each site found
 again in this engine; the investigations are GHMetalRecomp's.
 
+Building the project, its configuration and how the SDK is modified: [Building and developing](development.md).
+
 | Note | Status |
 |---|---|
 | [The fixes ported from GH Metallica](fixes-from-gh-metallica.md) | Ported: the guitar, the threads' waits, the song clock, the audio, the crowd's claps, quitting, the second controller, the keyboard, frame rates above 60, ultrawide, language; 2026-11-13: the intro skip, the red border, V-Sync and the SDK's settings, the render thread woken by the counters (G-Sync), a controller on the game's own layout, the launcher 3.21 |
@@ -18,4 +20,4 @@ again in this engine; the investigations are GHMetalRecomp's.
 | [The game's own debug menu](debug-menu.md) | Added (2026-11-24), off by default: Neversoft's debug menu in the main menu and the pause menu, without the development shortcuts that change the save |
 | [Mods](mods.md) | Added (2026-11-24), off by default: the note highway's scale, length, perspective, style (dark), opacity (the venue seen through it) and picture (a gallery); the whammy bar's sound, the instrument's volume on a miss |
 | [Screen effects](screen-effects.md) | Added (2026-11-24), on by default: switches for the bloom and the depth of field |
-| [Pending](pending.md) | What GH Metallica has that this game does not yet, and why: the audio's pacing, a look at G-Sync, each controller's kind, NativeXRenderer checks, online, the release |
+| [Pending](pending.md) | What GH Metallica has that this game does not yet, and why: the audio's pacing, a look at G-Sync, each controller's kind, NativeXRenderer checks, online (the release: done for 0.1.0) |

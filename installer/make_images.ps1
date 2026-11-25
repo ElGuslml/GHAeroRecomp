@@ -1,5 +1,5 @@
 # Renders the installer's wizard images from this project's own art with a headless Chrome (or Edge):
-#   - wizard-<w>x<h>.png from launcher\art\install.svg (the launcher's first-run art), for the Welcome and Finished
+#   - wizard-<w>x<h>.png from launcher\art\background.svg (the launcher's art), for the Welcome and Finished
 #     pages' image area (164:314; 100 %, 150 % and 200 % of Inno Setup 6.6's sizes);
 #   - small-<n>.png from res\icon.svg (the icon) when there is one, otherwise from the same art, for the inner pages'
 #     top right (58, 97 and 124 px).
@@ -15,9 +15,11 @@ if (-not $browser) { throw "Chrome or Edge is needed to render the images" }
 $work = Join-Path $env:TEMP "$(Split-Path $repo -Leaf)-installer-images"
 New-Item -ItemType Directory -Force $work | Out-Null
 
-function Render([string]$svg, [int]$width, [int]$height, [string]$fit, [string]$out) {
+function Render([string]$svg, [int]$width, [int]$height, [string]$fit, [string]$out, [string]$viewBox = "") {
   $content = [System.IO.File]::ReadAllText($svg)
-  # The art fills the area as the launcher draws it (preserveAspectRatio), the icon is centered.
+  # The art fills the area as the launcher draws it (preserveAspectRatio), the icon is centered. A viewBox, when
+  # given, is the part of the art the area is cropped around.
+  if ($viewBox) { $content = $content -replace 'viewBox="[^"]*"', "viewBox=""$viewBox""" }
   $content = $content -replace '<svg ', "<svg preserveAspectRatio=""$fit"" width=""$width"" height=""$height"" "
   $content = $content -replace ' width="256" height="256"', ''
   $html = "<!doctype html><html><head><style>html,body{margin:0;padding:0;overflow:hidden;background:transparent}" +
@@ -35,14 +37,16 @@ function Render([string]$svg, [int]$width, [int]$height, [string]$fit, [string]$
   "$out ${width}x${height}"
 }
 
+# The art cropped around the record's label: its middle is at x 1020 of the art's 1280, near the right edge.
 foreach ($size in @(@(202, 386), @(336, 643), @(430, 824))) {
-  Render "$repo\launcher\art\install.svg" $size[0] $size[1] "xMidYMax slice" "wizard-$($size[0])x$($size[1]).png"
+  Render "$repo\launcher\art\background.svg" $size[0] $size[1] "xMidYMid slice" "wizard-$($size[0])x$($size[1]).png" `
+    "822 0 397 760"
 }
 $icon = "$repo\res\icon.svg"
 foreach ($size in @(58, 97, 124)) {
   if (Test-Path $icon) {
     Render $icon $size $size "xMidYMid meet" "small-$size.png"
   } else {
-    Render "$repo\launcher\art\install.svg" $size $size "xMidYMid slice" "small-$size.png"
+    Render "$repo\launcher\art\background.svg" $size $size "xMidYMid slice" "small-$size.png"
   }
 }

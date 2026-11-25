@@ -18,7 +18,9 @@ graphics driver. On NVIDIA GPUs a pipeline the list does not name, but whose sha
 from parts in microseconds (Vulkan's graphics pipeline libraries) while its optimized version compiles in the background.
 
 **The list** (from Gustavo's play, 2026-11-08): 157 of 159 shaders, 307 pipelines, from 196 parts. On an RTX 4070 Ti,
-from an empty storage, "Compiling shaders" took 1.7 s.
+from an empty storage, "Compiling shaders" took 1.7 s. Made again for 0.1.0 (2026-11-25) from the development storage
+of his plays to 2026-11-24: 169 of 171 shaders, 266 translations, 329 pipelines (the two left out are not in the game's
+shader files).
 
 **How to turn it off.** Skip on that screen starts the game at once; it then compiles at its draws, as before. Without the
 list file, or with the Xenos renderer, the launcher does not show it. Started without the launcher, the game does what it

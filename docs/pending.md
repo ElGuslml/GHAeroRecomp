@@ -27,6 +27,7 @@ this game runs on Guitar Hero III's engine, so each of GH Metallica's fixes has 
   alpha to coverage at 1x (D138: hair and cut-out edges against the Xenos path), and the shadow quality row
   (`kShadowQuality`, off).
 - **Online play:** this engine's online code not studied yet.
-- **Release:** the players' README (`res/README.txt` is the template's), README.md, the launcher's look.
+- **Release:** done for 0.1.0 (2026-11-25): the icon (`res/icon.svg`), README.md, the players' `res/README.txt`, the
+  launcher's art, the update URLs, NativeXRenderer the default renderer, the pipeline list made again.
 - **Not applicable:** drums and singing (this game has guitar and bass only), the tap notes' trail (no tap notes), GH
   Metallica's band strings script (not in this game), its job queue's lock (no such queue).

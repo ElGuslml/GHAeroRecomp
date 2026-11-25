@@ -38,9 +38,10 @@ inline constexpr const char* kVersion = RECOMP_VERSION_STR;
 inline constexpr const char* kArtKicker = "GUITAR HERO";
 inline constexpr const char* kArtTitle = "Aerosmith";
 // The mark in the header's logo while the game's icon is unknown: an icon's SVG paths in a 24-unit box, stroked as the
-// launcher's icons are (ui.cpp).
+// launcher's icons are (ui.cpp). A guitar pick with a star, as res/icon.svg (GH Warriors of Rock's mark).
 inline constexpr const char* kBrandIcon =
-    "<circle cx='12' cy='12' r='9'/><circle cx='12' cy='12' r='2.5'/><path d='M12 3a9 9 0 0 1 9 9'/>";
+    "<path d='M12 21c-4-4-8-9-8-13 0-3 4-5 8-5s8 2 8 5c0 4-4 9-8 13z'/>"
+    "<path d='M12 6.5l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.4-2.5 1.4.6-2.8-2.1-1.9 2.8-.3z'/>";
 // The header's name beside the logo, on two lines (in capitals); an empty title: the art's (kArtTitle) alone.
 inline constexpr const char* kBrandTitle = "Guitar Hero";
 inline constexpr const char* kBrandSubtitle = "Aerosmith";
@@ -72,11 +73,10 @@ inline constexpr int kFrameHeight = GAME_FRAME_HEIGHT;
 // --- Updates ---
 
 // This project's releases (updater.cpp): GitHub's API for them, newest first, and their page. Empty: the launcher
-// does not look for updates (a private repository), and its Updates page only shows the version. Once the repository
-// is public: "https://api.github.com/repos/<user>/GHAeroRecomp/releases?per_page=20" and
-// "https://github.com/<user>/GHAeroRecomp/releases".
-inline constexpr const char* kReleasesApi = "";
-inline constexpr const char* kReleasesPage = "";
+// does not look for updates, and its Updates page only shows the version. Set from the first release on, while the
+// repository is still private (the check fails until it is public, and the releases made then are found).
+inline constexpr const char* kReleasesApi = "https://api.github.com/repos/ElGuslml/GHAeroRecomp/releases?per_page=20";
+inline constexpr const char* kReleasesPage = "https://github.com/ElGuslml/GHAeroRecomp/releases";
 
 // --- The game's own options (a cvar each; empty: the game has no such option, and the launcher no row) ---
 
@@ -85,8 +85,9 @@ inline constexpr const char* kReleasesPage = "";
 // nothing of NativeXRenderer.
 inline constexpr bool kHasNativeXRenderer = GAME_HAS_NATIVE_X_RENDERER;
 // The renderer chosen until the player picks one (an options file without native_x_renderer): NativeXRenderer once a
-// full play test has gone through it (as in POTCAWE, its D56), the Xenos path until then.
-inline constexpr bool kNativeXRendererDefault = false;
+// full play test has gone through it (as in POTCAWE, its D56), the Xenos path until then. NativeXRenderer from the
+// first release, 0.1.0 (Gustavo, 2026-11-25: his songs were played with it), as in the other Guitar Hero games.
+inline constexpr bool kNativeXRendererDefault = true;
 // The upscaling row's AMD FSR 3.1 and NVIDIA DLSS (NativeXRenderer's D47-D49, D116: the main 3D view rebuilt from
 // several frames; RecompLauncher 3.6, 3.9): only for a game whose hooks mark its views (native_x_renderer::BeginView
 // and EndViewGeometry, as POTCAWE's). Without them DLSS never runs; false: FSR 1 and

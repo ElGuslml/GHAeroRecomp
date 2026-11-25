@@ -423,23 +423,23 @@ const std::vector<GameControlGroup>& GameKeyboardControlsFor(uint32_t language) 
   static const ControlWords kItalianWords{"", "", "", "", "", "Tasto giallo", "Tasto blu", "Tasto arancione", "", "",
                                           "Leva del vibrato", "VIBR", "Croce su", "Croce giù", "Levetta destra"};
   static const std::vector<GameControlGroup> kEnglish = Keyboard(
-      kEnglishWords, {"Keyboard Â· Frets (a press plays the note)", "Keyboard Â· Whammy and Star Power",
-                      "Menus", "Green fret Â· Select", "Red fret Â· Back", "Menu up", "Menu down"});
+      kEnglishWords, {"Keyboard \xC2\xB7 Frets (a press plays the note)", "Keyboard \xC2\xB7 Whammy and Star Power",
+                      "Menus", "Green fret \xC2\xB7 Select", "Red fret \xC2\xB7 Back", "Menu up", "Menu down"});
   static const std::vector<GameControlGroup> kGerman = Keyboard(
-      kGermanWords, {"Tastatur Â· Bünde (Drücken spielt die Note)", "Tastatur Â· Whammy und Star Power",
-                     "Menüs", "Grüner Bund Â· Auswählen", "Roter Bund Â· Zurück", "Menü hoch",
+      kGermanWords, {"Tastatur \xC2\xB7 Bünde (Drücken spielt die Note)", "Tastatur \xC2\xB7 Whammy und Star Power",
+                     "Menüs", "Grüner Bund \xC2\xB7 Auswählen", "Roter Bund \xC2\xB7 Zurück", "Menü hoch",
                      "Menü runter"});
   static const std::vector<GameControlGroup> kFrench = Keyboard(
-      kFrenchWords, {"Clavier Â· Frettes (appuyer joue la note)", "Clavier Â· Vibrato et Star Power",
-                     "Menus", "Frette verte Â· Choisir", "Frette rouge Â· Retour", "Menu haut",
+      kFrenchWords, {"Clavier \xC2\xB7 Frettes (appuyer joue la note)", "Clavier \xC2\xB7 Vibrato et Star Power",
+                     "Menus", "Frette verte \xC2\xB7 Choisir", "Frette rouge \xC2\xB7 Retour", "Menu haut",
                      "Menu bas"});
   static const std::vector<GameControlGroup> kSpanish = Keyboard(
-      kSpanishWords, {"Teclado Â· Trastes (pulsar toca la nota)", "Teclado Â· Trémolo y Star Power",
-                      "Menús", "Traste verde Â· Seleccionar", "Traste rojo Â· Atrás", "Menú arriba",
+      kSpanishWords, {"Teclado \xC2\xB7 Trastes (pulsar toca la nota)", "Teclado \xC2\xB7 Trémolo y Star Power",
+                      "Menús", "Traste verde \xC2\xB7 Seleccionar", "Traste rojo \xC2\xB7 Atrás", "Menú arriba",
                       "Menú abajo"});
   static const std::vector<GameControlGroup> kItalian = Keyboard(
-      kItalianWords, {"Tastiera Â· Tasti (premere suona la nota)", "Tastiera Â· Vibrato e Star Power",
-                      "Menu", "Tasto verde Â· Seleziona", "Tasto rosso Â· Indietro", "Menu su",
+      kItalianWords, {"Tastiera \xC2\xB7 Tasti (premere suona la nota)", "Tastiera \xC2\xB7 Vibrato e Star Power",
+                      "Menu", "Tasto verde \xC2\xB7 Seleziona", "Tasto rosso \xC2\xB7 Indietro", "Menu su",
                       "Menu giù"});
   switch (language) {
     case 3:

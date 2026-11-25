@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- icon.svg simplified for 16-32 px: no rivets, rays, glow, sparkles, sunburst or rings; a thicker rim, a bigger
+       pick and a bigger star. -->
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f2ee"/>
+      <stop offset="0.5" stop-color="#b5b1ab"/>
+      <stop offset="1" stop-color="#5e5b57"/>
+    </linearGradient>
+    <linearGradient id="label" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb06b"/>
+      <stop offset="0.55" stop-color="#f5872a"/>
+      <stop offset="1" stop-color="#d64fa8"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="128" cy="128" r="122" fill="url(#steel)" stroke="#1b1917" stroke-width="8"/>
+  <circle cx="128" cy="128" r="98" fill="#140c19" stroke="#1b1917" stroke-width="8"/>
+
+  <g transform="translate(128 130) scale(1.16) translate(-128 -131)">
+    <path d="M 128,204 C 100,178 66,140 66,104 C 66,74 98,58 128,58 C 158,58 190,74 190,104 C 190,140 156,178 128,204 Z" fill="url(#label)" stroke="#0d0d0f" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M 128.0,74.0 L 139.2,104.6 L 171.7,105.8 L 146.1,125.9 L 155.0,157.2 L 128.0,139.0 L 101.0,157.2 L 109.9,125.9 L 84.3,105.8 L 116.8,104.6 Z" fill="#f4e6d0" stroke="#111113" stroke-width="7" stroke-linejoin="round"/>
+  </g>
+</svg>
