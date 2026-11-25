@@ -150,10 +150,13 @@ inline constexpr std::array<Language, 5> kLanguages{{
 // Switches of the game's own (src/), each a boolean cvar with a row in the Settings tab (game_types.h's Toggle); their
 // titles, hints and help are game.cpp's (GameTexts::toggles and toggle_help, in this order). In Settings > Game >
 // Starting the game (launcher 3.28's kStart), off as on the console: the boot's videos skipped (src/intro.cpp). Then
-// in Settings > Game, off as on the console: the game's debug menu (src/debug_menu.cpp, docs/debug-menu.md).
-inline constexpr std::array<Toggle, 3> kToggles{{
+// in Settings > Game, off as on the console: the game's debug menu (src/debug_menu.cpp, docs/debug-menu.md). In Mods >
+// Sound, on as on the console: the whammy bar's bend and the instrument's track lowered on a miss (src/mods.cpp).
+inline constexpr std::array<Toggle, 5> kToggles{{
     {"ghaerosmith_skip_intro", false, ToggleGroup::kStart},
     {"ghaerosmith_debug_menu", false},
+    {"ghaerosmith_whammy_sound", true, ToggleGroup::kModsSound},
+    {"ghaerosmith_miss_lower", true, ToggleGroup::kModsSound},
     {"ghaerosmith_highway_keep_speed", false, ToggleGroup::kModsHighway, "ghaerosmith_highway_perspective"},
 }};
 
@@ -161,19 +164,22 @@ inline constexpr std::array<Toggle, 3> kToggles{{
 // highway's size with one player (80-120 % by 5), its length in time (the console's highway continued in its own
 // perspective, the notes seen earlier at the same speed: 100, 125, 150, 170 %), its perspective (25-150 % of the
 // console's compression by 25), and its look: the style (the original, or the community's black highway) and the
-// opacity (the venue seen through it). Each a change of the game's script data when it starts (src/mods.cpp). Their
+// opacity (the venue seen through it). Each a change of the game's script data when it starts (src/mods.cpp). Mods >
+// Sound: how much of the player's instrument track stays on a miss (0-100 % by 10; 0 = muted as on the console). Their
 // titles, hints, help and the styles' names are game.cpp's.
 inline constexpr const char* kHighwayScales[] = {"80", "85", "90", "95", "100", "105", "110", "115", "120"};
 inline constexpr const char* kHighwayLengths[] = {"100", "125", "150", "170"};
 inline constexpr const char* kHighwayPerspectives[] = {"25", "50", "75", "100", "125", "150"};
 inline constexpr const char* kHighwayStyles[] = {"original", "dark"};
 inline constexpr const char* kHighwayOpacities[] = {"100", "90", "80", "70", "60", "50", "40", "30"};
-inline constexpr std::array<Choice, 5> kChoices{{
+inline constexpr const char* kMissVolumes[] = {"0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"};
+inline constexpr std::array<Choice, 6> kChoices{{
     {"ghaerosmith_highway_scale", kHighwayScales, "100", ToggleGroup::kModsHighway, " %"},
     {"ghaerosmith_highway_length", kHighwayLengths, "100", ToggleGroup::kModsHighway, " %"},
     {"ghaerosmith_highway_perspective", kHighwayPerspectives, "100", ToggleGroup::kModsHighway, " %"},
     {"ghaerosmith_highway_style", kHighwayStyles, "original", ToggleGroup::kModsHighwayLook, "", true},
     {"ghaerosmith_highway_opacity", kHighwayOpacities, "100", ToggleGroup::kModsHighwayLook, " %"},
+    {"ghaerosmith_miss_volume", kMissVolumes, "0", ToggleGroup::kModsSound, " %", false, "ghaerosmith_miss_lower"},
 }};
 
 // The Mods tab's Highway section's gallery and preview (launcher 3.30): this game has no highway mods.

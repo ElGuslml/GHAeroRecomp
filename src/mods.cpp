@@ -1,6 +1,7 @@
-// ghaerosmith - the launcher's Mods page: the note highway's scale, length, perspective, style and opacity, as GH5's and
-// GH Warriors of Rock's (their src/mods.cpp). Each is a change of the game's own script data (src/script_globals.cpp),
-// made when the game starts.
+// ghaerosmith - the launcher's Mods page: the note highway's scale, length, perspective, style and opacity, the whammy
+// bar's sound and the instrument's volume on a miss, as GH5's and GH Warriors of Rock's (their src/mods.cpp). The
+// highway's are changes of the game's own script data (src/script_globals.cpp), made when the game starts; the sound's
+// are hooks on two of its C functions.
 //
 // - The highway (scripts\guitar\highway_2d.qb's generate_pos_table, at each song's setup): it copies the one-player
 //   values (guitar_tweaks.qb's highway_height1 350, highway_top_width1 160, widthOffsetFactor1 2.2, highway_playline1
@@ -38,14 +39,38 @@
 //   drawn under the highway, black behind a see-through one). With the opacity below 100, create_highway_prepass reads
 //   highwayvisible as OFF: the prepass is never turned on and the venue shows through. (GH5 cleared the prepass flag
 //   of the window instead: its create_highway_prepass makes a window element.)
+// - Whammy sound effect: control_whammy_pitchshift (scripts\guitar\guitar_input.qb, run while a sustain is held)
+//   reads the bar and calls set_whammy_pitchshift (guitar_song.qb), which bends the player's guitar bus with
+//   setsoundbusseffects effect = {effect = PitchShift name = Guitar1PitchShift (Guitar2PitchShift for player 2) pitch =
+//   (1 - control x 0.057)}; GH5 bends it in C++ (sub_821E8DE0). Off: SetSoundBussEffects (sub_82280420; a C function:
+//   r3 its parameters, r4 the calling script, its name at +216) does nothing when set_whammy_pitchshift calls it, so the
+//   bus keeps its pitch. The bar still wobbles the sustain on the highway and fills Star Power (SetNewWhammyValue, after
+//   it). Every player's, a remote online one's too (net_whammy_pitch_shift runs the same script).
+// - Instrument volume on a miss: GuitarEvent_MissedNote (unless player_status.guitar_volume is already 0) and
+//   GuitarEvent_UnnecessaryNote (guitar_events.qb) set player_status.guitar_volume = 0 and call UpdateGuitarVolume
+//   (sub_82115F50); a hit sets it back to 100 (GuitarEvent_HitNotes_CFunc, sub_82116700). UpdateGuitarVolume reads both
+//   players' guitar_volume (r26, r19 at 0x82116168; the last values it set, kept at 0x829B8D84 and +4, in r31 and r24)
+//   and sets the guitar_player<n>_unique_id streams' volume to that percentage (with one player, or two on different
+//   parts), ramped down in guitarvolumeramptimedown (0.02 s) or up from 0 in guitarvolumeramptimeup (0 s). Here the
+//   value that call reads is the percentage, when the calling script is a miss's (r4 at its entry) and the player's last
+//   value was not 0, and again in the calls after it until the player's guitar_volume is no longer 0; the game's own
+//   mutes keep 0 (a sustain let go early, CheckNoteHoldPerFrame sub_82120280; the start before the first note). The
+//   game's guitar_volume stays 0 (the miss scripts and the network messages read it). Two players on the same part (a
+//   crossfade of the guitar and its partial stereo level, r18 = 1) and guitar_always_volume_100 (r25 = 1): not changed.
+//   From the percentage back to 100 the stream ramps in the down time (0.02 s; the game's up time is 0).
 
 #include "mods.h"
 
 #include <rex/cvar.h>
 #include <rex/logging.h>
+#include <rex/ppc/context.h>
+#include <rex/system/kernel_state.h>
+#include <rex/system/xmemory.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -71,6 +96,15 @@ REXCVAR_DEFINE_STRING(ghaerosmith_highway_style, "original", "GHAerosmith",
 REXCVAR_DEFINE_INT32(ghaerosmith_highway_opacity, 100, "GHAerosmith",
                      "The note highway's opacity in percent: below 100 the venue shows through it (the game's cut-out of "
                      "the venue under the highway left out); 100 = as on the console");
+REXCVAR_DEFINE_BOOL(ghaerosmith_whammy_sound, true, "GHAerosmith",
+                    "The whammy bar bends a held sustain's pitch; false keeps the pitch (the bar still wobbles the note "
+                    "on the highway and fills Star Power)");
+REXCVAR_DEFINE_BOOL(ghaerosmith_miss_lower, true, "GHAerosmith",
+                    "Your instrument's track lowered on a miss or a strum without a note, to ghaerosmith_miss_volume; "
+                    "false: it plays on at full volume");
+REXCVAR_DEFINE_INT32(ghaerosmith_miss_volume, 0, "GHAerosmith",
+                     "How much of your instrument's track stays when you miss a note or strum without one, in percent "
+                     "(0-100); 0 = muted as on the console");
 
 namespace ghaerosmith::mods {
 namespace {
@@ -296,9 +330,115 @@ void Configure() {
     summary += " highway opacity " + std::to_string(opacity) + " %";
   }
 
+  if (!REXCVAR_GET(ghaerosmith_whammy_sound)) {
+    summary += " whammy sound off";
+  }
+  const int32_t miss = MissVolume();
+  if (miss > 0) {
+    summary += " instrument on a miss " + std::to_string(miss) + " %";
+  }
+
   if (!summary.empty()) {
     REXLOG_INFO("[mods]{}", summary);
   }
 }
 
+int32_t MissVolume() {
+  static const int32_t volume =
+      REXCVAR_GET(ghaerosmith_miss_lower) ? std::clamp(REXCVAR_GET(ghaerosmith_miss_volume), 0, 100) : 100;
+  return volume;
+}
+
 }  // namespace ghaerosmith::mods
+
+namespace {
+
+uint8_t* GuestBase() {
+  auto* kernel = rex::system::kernel_state();
+  return kernel && kernel->memory() ? kernel->memory()->virtual_membase() : nullptr;
+}
+
+uint32_t Load32(const uint8_t* base, uint32_t address) {
+  uint32_t value;
+  std::memcpy(&value, base + address, 4);
+  return __builtin_bswap32(value);
+}
+
+constexpr uint32_t kScriptName = 216;                  // the running script's name in the interpreter's script object
+constexpr uint32_t kSetWhammyPitchshift = 0xDCFE15A0;  // set_whammy_pitchshift
+constexpr uint32_t kMissedNote = 0x8D14D919;           // GuitarEvent_MissedNote
+constexpr uint32_t kUnnecessaryNote = 0x1D649F39;      // GuitarEvent_UnnecessaryNote
+
+// The script that called UpdateGuitarVolume (0: called from the game's code with no script).
+thread_local uint32_t t_volume_caller = 0;
+// Per player: the last UpdateGuitarVolume set the miss's percentage (until its guitar_volume is no longer 0).
+std::atomic<bool> g_kept[2] = {false, false};
+std::atomic<int> g_whammy_logged{0};
+std::atomic<int> g_miss_logged{0};
+
+uint32_t ScriptName(const uint8_t* base, uint32_t script) { return script ? Load32(base, script + kScriptName) : 0; }
+
+// One player's volume as UpdateGuitarVolume read it (`volume`, the last value it set `last`): the miss's percentage
+// instead of 0 after a miss.
+void KeepOnMiss(int player, PPCRegister& volume, uint32_t last, bool miss, int32_t percent) {
+  if (volume.u32 != 0) {
+    g_kept[player].store(false);
+    return;
+  }
+  if (!g_kept[player].load() && !(miss && last != 0)) {
+    return;  // the game's own mute
+  }
+  volume.u64 = uint64_t(percent);
+  if (!g_kept[player].exchange(true) && g_miss_logged.fetch_add(1) < 4) {
+    REXLOG_INFO("[mods] a miss (script {:08X}, player {}): the instrument kept at {} %", t_volume_caller, player + 1,
+                percent);
+  }
+}
+
+}  // namespace
+
+// [[midasm_hook]] 0x82280420 (the entry of SetSoundBussEffects, sub_82280420), return_on_true: r3 = its parameters, r4 =
+// the calling script. With ghaerosmith_whammy_sound off, set_whammy_pitchshift's bend of the guitar bus is not applied.
+bool GHAerosmithWhammySoundHook(PPCRegister& r3, PPCRegister& r4) {
+  static const bool on = REXCVAR_GET(ghaerosmith_whammy_sound);
+  if (on) {
+    return false;
+  }
+  const uint8_t* base = GuestBase();
+  if (!base || ScriptName(base, r4.u32) != kSetWhammyPitchshift) {
+    return false;
+  }
+  if (g_whammy_logged.fetch_add(1) < 2) {
+    REXLOG_INFO("[mods] set_whammy_pitchshift's bend not applied (ghaerosmith_whammy_sound off)");
+  }
+  r3.u64 = 1;
+  return true;
+}
+
+// [[midasm_hook]] 0x82115F50 (the entry of UpdateGuitarVolume, sub_82115F50): r4 = the calling script.
+void GHAerosmithGuitarVolumeHook(PPCRegister& r4) {
+  if (ghaerosmith::mods::MissVolume() <= 0) {
+    return;
+  }
+  const uint8_t* base = GuestBase();
+  t_volume_caller = base ? ScriptName(base, r4.u32) : 0;
+}
+
+// [[midasm_hook]] 0x82116168 (UpdateGuitarVolume, once both players' values are read; a branch target): r26 / r19 =
+// player 1's / 2's guitar_volume, r31 / r24 = the last values it set, r18 = 1 with two players on the same part, r25 =
+// 1 with guitar_always_volume_100.
+void GHAerosmithMissVolumeHook(PPCRegister& r18, PPCRegister& r19, PPCRegister& r24, PPCRegister& r25,
+                               PPCRegister& r26, PPCRegister& r31) {
+  const int32_t percent = ghaerosmith::mods::MissVolume();
+  if (percent <= 0) {
+    return;
+  }
+  if (r18.u32 == 1 || r25.u32 == 1) {
+    g_kept[0].store(false);
+    g_kept[1].store(false);
+    return;
+  }
+  const bool miss = t_volume_caller == kMissedNote || t_volume_caller == kUnnecessaryNote;
+  KeepOnMiss(0, r26, r31.u32, miss, percent);
+  KeepOnMiss(1, r19, r24.u32, miss, percent);
+}

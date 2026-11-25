@@ -297,3 +297,22 @@ address = 0x8219BF30   # lbz r8,1(r3) (the entry of sub_8219BF30): r3 = the comp
 name = "GHAerosmithGlobalResolveHook"
 registers = ["r3"]
 return_on_true = true
+
+# Mods > Sound (src/mods.cpp). The whammy bar's bend: set_whammy_pitchshift bends the guitar bus with SetSoundBussEffects
+# (a C function: r3 its parameters, r4 the calling script); with ghaerosmith_whammy_sound off that call does nothing.
+[[midasm_hook]]
+address = 0x82280420   # mflr r12 (the entry of SetSoundBussEffects, sub_82280420)
+name = "GHAerosmithWhammySoundHook"
+registers = ["r3", "r4"]
+return_on_true = true
+# The instrument's volume on a miss: UpdateGuitarVolume (sub_82115F50) sets the guitar streams' volume to the players'
+# guitar_volume; its calling script at the entry, the players' values (r26, r19) once read at 0x82116168 (a branch
+# target).
+[[midasm_hook]]
+address = 0x82115F50   # mflr r12 (the entry of UpdateGuitarVolume): r4 = the calling script
+name = "GHAerosmithGuitarVolumeHook"
+registers = ["r4"]
+[[midasm_hook]]
+address = 0x82116168   # lis r11,-32113 (after the players' guitar_volume and guitar_always_volume_100 are read)
+name = "GHAerosmithMissVolumeHook"
+registers = ["r18", "r19", "r24", "r25", "r26", "r31"]

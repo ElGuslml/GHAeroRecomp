@@ -212,6 +212,13 @@ ghaerosmith_highway_keep_speed = false
 ghaerosmith_highway_style = "original"
 # The note highway's opacity in percent: below 100 the venue shows through it (src/mods.cpp). 100 = as on the console.
 ghaerosmith_highway_opacity = 100
+# The whammy bar's sound (src/mods.cpp): false keeps a held sustain's pitch (the bar still wobbles the note and fills
+# Star Power). true = as on the console.
+ghaerosmith_whammy_sound = true
+# Your instrument's track on a miss or a strum without a note (src/mods.cpp): lowered to miss_volume percent (0 =
+# muted as on the console), or with miss_lower = false left at full volume.
+ghaerosmith_miss_lower = true
+ghaerosmith_miss_volume = 0
 # The mouse cursor hidden over the game after cursor_auto_hide_ms without moving it (shown again when it moves, while
 # another window has the focus, and over the SDK's overlays). false = always shown.
 cursor_auto_hide = true
