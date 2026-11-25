@@ -149,9 +149,11 @@ inline constexpr std::array<Language, 5> kLanguages{{
 
 // Switches of the game's own (src/), each a boolean cvar with a row in the Settings tab (game_types.h's Toggle); their
 // titles, hints and help are game.cpp's (GameTexts::toggles and toggle_help, in this order). In Settings > Game >
-// Starting the game (launcher 3.28's kStart), off as on the console: the boot's videos skipped (src/intro.cpp).
-inline constexpr std::array<Toggle, 1> kToggles{{
+// Starting the game (launcher 3.28's kStart), off as on the console: the boot's videos skipped (src/intro.cpp). Then
+// in Settings > Game, off as on the console: the game's debug menu (src/debug_menu.cpp, docs/debug-menu.md).
+inline constexpr std::array<Toggle, 2> kToggles{{
     {"ghaerosmith_skip_intro", false, ToggleGroup::kStart},
+    {"ghaerosmith_debug_menu", false},
 }};
 
 // Rows of the game's own with several values (launcher 3.29): none here.

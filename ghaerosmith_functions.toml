@@ -265,3 +265,35 @@ address = 0x824CE194   # stw r11,8(r27) (sub_824CE078, SetTexture: the sampler's
 name = "GHAerosmithTextureFenceHook"
 registers = ["r11", "r27"]
 jump_address_on_true = 0x824CE1EC
+
+# The game's debug menu offered in the main and pause menus (src/debug_menu.cpp, ghaerosmith_debug_menu): the script
+# global enable_button_cheats reads as 1 only in the scripts that build those menus. The script interpreter's
+# statement (sub_82179D38, r31 = the script) evaluates expressions with sub_822FF180 at two places and resolves a type
+# 26 component with sub_8219BF30 at one (none of these addresses is a branch target); sub_8219BF30 resolves a "$name"
+# component (r3) to the global's value.
+[[midasm_hook]]
+address = 0x82179F14   # bl 0x822FF180
+name = "GHAerosmithScriptEvalEnterHook"
+registers = ["r31"]
+[[midasm_hook]]
+address = 0x82179F18   # stw r3,16(r31), after it
+name = "GHAerosmithScriptEvalLeaveHook"
+[[midasm_hook]]
+address = 0x8217A1F0   # bl 0x822FF180 (the token 14, an expression in parentheses)
+name = "GHAerosmithScriptEvalEnterHook"
+registers = ["r31"]
+[[midasm_hook]]
+address = 0x8217A1F4   # stw r3,16(r31), after it
+name = "GHAerosmithScriptEvalLeaveHook"
+[[midasm_hook]]
+address = 0x8217A240   # bl 0x8219BF30 (a type 26 component)
+name = "GHAerosmithScriptEvalEnterHook"
+registers = ["r31"]
+[[midasm_hook]]
+address = 0x8217A244   # mr r3,r30, after it
+name = "GHAerosmithScriptEvalLeaveHook"
+[[midasm_hook]]
+address = 0x8219BF30   # lbz r8,1(r3) (the entry of sub_8219BF30): r3 = the component
+name = "GHAerosmithGlobalResolveHook"
+registers = ["r3"]
+return_on_true = true

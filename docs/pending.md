@@ -9,17 +9,18 @@ this game runs on Guitar Hero III's engine, so each of GH Metallica's fixes has 
   `docs/audio-crackling.md`). That needed FMOD's mixing moved to the SDK's audio worker first (their `src/fmod_mix.cpp`):
   this game's FMOD (Ex 4.06) polls its ring from its own thread, and without the spacing its music is noise. So 3000
   stays here until `fmod_mix.cpp` is ported to this FMOD.
-- **The game's debug menu.** `enable_button_cheats` is 0 in this game's scripts and `create_main_menu` /
-  `create_pause_menu` read it, as GH Smash Hits'; but Guitar Hero III's script interpreter is not GH Metallica's (no
-  function resolves a `$name` component with its code), so its expression evaluation and its globals' resolve have to
-  be found first.
+- **The game's debug menu:** done on 2026-11-24 ([debug-menu.md](debug-menu.md)): Guitar Hero III's interpreter
+  resolves a `$name` in `sub_8219BF30` (a component's type in the low 7 bits of +1, the key at +8; the globals' table
+  at `0x82B94030`), its statement is `sub_82179D38` (r31 the script, its name at +216). The same functions open the
+  way to GH5's script-global mods (the highway, the whammy and miss sounds), still to do.
 - **The screen effects' switches** (GH Metallica's `src/screen_fx.cpp`): this engine's post-processing composite is not
   mapped.
 - **V-Sync with G-Sync, the game's side:** done on 2026-11-13 (`docs/fixes-from-gh-metallica.md`, "The render thread
   woken by the counters"); left: a look on a G-Sync / FreeSync display, where GH Metallica's saw tooth showed.
 - **Each controller's kind** (GH Metallica's issue 4: a port's kind asked again outside a song): this engine tells
   guitars apart with other code (`IsGuitarController`, sub_82107D40).
-- **To check with NativeXRenderer:** the bloom's lattice (D127, `unscaled_screen_fractions`, at 1440p and above),
+- **To check with NativeXRenderer:** the bloom's lattice (D127, `unscaled_screen_fractions`: on since 2026-11-24, no
+  difference seen at 1440p; to look at 4K),
   alpha to coverage at 1x (D138: hair and cut-out edges against the Xenos path), and the shadow quality row
   (`kShadowQuality`, off).
 - **Online play:** this engine's online code not studied yet.

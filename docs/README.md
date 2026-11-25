@@ -15,4 +15,5 @@ again in this engine; the investigations are GHMetalRecomp's.
 | [D3D's fence stamps](fence-stamps.md) | Fixed (2026-11-24): the fences Direct3D writes into unbound buffers and textures go where the page watches do not see them; a third fewer buffer copies a frame in a song (NativeXRenderer) |
 | [The XDK's atomic operations without a process-wide lock](interlocked-without-lock.md) | Fixed (2026-11-24): `skip_msr`, every site checked; about 16 % less CPU in a song at 160 FPS |
 | [The keyboard](keyboard.md) | Fixed (2026-11-24): a guitar's keys in the menus (D selects), the game's controller layout in a song |
-| [Pending](pending.md) | What GH Metallica has that this game does not yet, and why: the audio's pacing, the debug menu, the screen effects, a look at G-Sync each controller's kind, NativeXRenderer checks, online, the release |
+| [The game's own debug menu](debug-menu.md) | Added (2026-11-24), off by default: Neversoft's debug menu in the main menu and the pause menu, without the development shortcuts that change the save |
+| [Pending](pending.md) | What GH Metallica has that this game does not yet, and why: the audio's pacing, the screen effects, a look at G-Sync, each controller's kind, NativeXRenderer checks, online, the release |

@@ -14,8 +14,14 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .welcome_title = "Welcome backstage",
       .welcome_text = "Before you hit the stage, the game has to be installed. The launcher extracts its files from "
                       "your Xbox 360 ISO; you only have to do this once.",
-      .toggles = {"Skip the intro videos", "The game starts at its title screen, without the logos and the intro."},
-      .toggle_help = {"Skips the logos and the game's intro video at each start: the game opens at its title screen once it has loaded."},
+      .toggles = {
+          "Skip the intro videos", "The game starts at its title screen, without the logos and the intro.",
+          "Game debug menu", "Neversoft's debug menu in the main menu and the pause menu.",
+      },
+      .toggle_help = {
+          "Skips the logos and the game's intro video at each start: the game opens at its title screen once it has loaded.",
+          "Adds a Debug Menu item to the main menu and a Debug item to the pause menu: Neversoft's own menu (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings with the bot and the song's time, ...). Its texts are in English. Unlock All changes the save as playing does; some items need Neversoft's development tools and do nothing. The development shortcuts the same switch had (unlocking or completing songs from the setlist) stay off.",
+      },
       .done_title = "The stage is yours!",
       .done_text = "The game was installed. Go play now, or first review the video, graphics and instrument settings; "
                    "you can always change them in the launcher.",
@@ -29,8 +35,14 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .welcome_title = "Willkommen im Backstage",
       .welcome_text = "Bevor es auf die Bühne geht, muss das Spiel installiert werden. Der Launcher entpackt die Dateien "
                       "aus deinem Xbox-360-ISO; das musst du nur einmal tun.",
-      .toggles = {"Intro-Videos überspringen", "Das Spiel startet am Titelbildschirm, ohne Logos und Intro."},
-      .toggle_help = {"Überspringt bei jedem Start die Logos und das Intro-Video des Spiels: Das Spiel öffnet nach dem Laden am Titelbildschirm."},
+      .toggles = {
+          "Intro-Videos überspringen", "Das Spiel startet am Titelbildschirm, ohne Logos und Intro.",
+          "Debug-Menü des Spiels", "Das Debug-Menü von Neversoft im Hauptmenü und im Pausenmenü.",
+      },
+      .toggle_help = {
+          "Überspringt bei jedem Start die Logos und das Intro-Video des Spiels: Das Spiel öffnet nach dem Laden am Titelbildschirm.",
+          "Fügt dem Hauptmenü den Eintrag Debug Menu und dem Pausenmenü den Eintrag Debug hinzu: Neversofts eigenes Menü (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings mit dem Bot und der Songzeit, ...). Seine Texte sind auf Englisch. Unlock All ändert den Spielstand wie das Spielen; manche Einträge brauchen Neversofts Entwicklungswerkzeuge und tun nichts. Die Entwicklerabkürzungen desselben Schalters (Songs in der Songliste freischalten oder abschließen) bleiben aus.",
+      },
       .done_title = "Die Bühne gehört dir!",
       .done_text = "Das Spiel wurde installiert. Leg gleich los oder sieh dir zuerst die Video-, Grafik- und "
                    "Instrumenteinstellungen an; du kannst sie jederzeit im Launcher ändern.",
@@ -44,8 +56,14 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .welcome_title = "Bienvenue en coulisses",
       .welcome_text = "Avant de monter sur scène, il faut installer le jeu. Le launcher extrait ses fichiers de votre ISO "
                       "Xbox 360 ; vous n'aurez à le faire qu'une fois.",
-      .toggles = {"Passer les vidéos d'intro", "Le jeu démarre sur son écran titre, sans les logos ni l'intro."},
-      .toggle_help = {"Passe à chaque démarrage les logos et la vidéo d'intro du jeu : le jeu s'ouvre sur son écran titre une fois chargé."},
+      .toggles = {
+          "Passer les vidéos d'intro", "Le jeu démarre sur son écran titre, sans les logos ni l'intro.",
+          "Menu de débogage du jeu", "Le menu de débogage de Neversoft dans le menu principal et le menu pause.",
+      },
+      .toggle_help = {
+          "Passe à chaque démarrage les logos et la vidéo d'intro du jeu : le jeu s'ouvre sur son écran titre une fois chargé.",
+          "Ajoute l'entrée Debug Menu au menu principal et l'entrée Debug au menu pause : le menu de Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings avec le bot et le temps de la chanson, ...). Ses textes sont en anglais. Unlock All modifie la sauvegarde comme le jeu ; certaines entrées demandent les outils de développement de Neversoft et ne font rien. Les raccourcis de développement du même interrupteur (débloquer ou terminer des chansons depuis la liste) restent désactivés.",
+      },
       .done_title = "La scène est à vous !",
       .done_text = "Le jeu a été installé. Allez jouer tout de suite, ou vérifiez d'abord les réglages vidéo, "
                    "graphiques et de vos instruments ; vous pourrez toujours les changer dans le launcher.",
@@ -60,8 +78,14 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .welcome_title = "Bienvenido al backstage",
       .welcome_text = "Antes de subir al escenario hay que instalar el juego. El launcher extrae los archivos desde tu "
                       "ISO de Xbox 360; solo tendrás que hacerlo una vez.",
-      .toggles = {"Saltar los videos de introducción", "El juego empieza en su pantalla de inicio, sin los logos ni la intro."},
-      .toggle_help = {"Salta en cada inicio los logos y el video de introducción del juego: el juego abre en su pantalla de inicio en cuanto carga."},
+      .toggles = {
+          "Saltar los videos de introducción", "El juego empieza en su pantalla de inicio, sin los logos ni la intro.",
+          "Menú de depuración del juego", "El menú de depuración de Neversoft en el menú principal y en el de pausa.",
+      },
+      .toggle_help = {
+          "Salta en cada inicio los logos y el video de introducción del juego: el juego abre en su pantalla de inicio en cuanto carga.",
+          "Añade la opción Debug Menu al menú principal y Debug al menú de pausa: el menú propio de Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings con el bot y el tiempo de la canción, ...). Sus textos están en inglés. Unlock All cambia la partida guardada como jugar; algunas opciones necesitan las herramientas de desarrollo de Neversoft y no hacen nada. Los atajos de desarrollo del mismo interruptor (desbloquear o completar canciones desde la lista) siguen desactivados.",
+      },
       .done_title = "¡El escenario es tuyo!",
       .done_text = "El juego se instaló correctamente. Puedes salir a tocar ya o revisar primero los ajustes de video, "
                    "gráficos y tus instrumentos; siempre podrás cambiarlos desde el launcher.",
@@ -76,8 +100,14 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .welcome_title = "Benvenuto nel backstage",
       .welcome_text = "Prima di salire sul palco bisogna installare il gioco. Il launcher estrae i file dalla tua ISO "
                       "Xbox 360; dovrai farlo una sola volta.",
-      .toggles = {"Salta i video introduttivi", "Il gioco parte dalla schermata del titolo, senza i loghi né l'intro."},
-      .toggle_help = {"Salta a ogni avvio i loghi e il video introduttivo del gioco: il gioco si apre sulla schermata del titolo appena caricato."},
+      .toggles = {
+          "Salta i video introduttivi", "Il gioco parte dalla schermata del titolo, senza i loghi né l'intro.",
+          "Menu di debug del gioco", "Il menu di debug di Neversoft nel menu principale e nel menu di pausa.",
+      },
+      .toggle_help = {
+          "Salta a ogni avvio i loghi e il video introduttivo del gioco: il gioco si apre sulla schermata del titolo appena caricato.",
+          "Aggiunge la voce Debug Menu al menu principale e Debug al menu di pausa: il menu di Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings con il bot e il tempo della canzone, ...). I suoi testi sono in inglese. Unlock All modifica il salvataggio come il gioco; alcune voci richiedono gli strumenti di sviluppo di Neversoft e non fanno nulla. Le scorciatoie di sviluppo dello stesso interruttore (sbloccare o completare canzoni dalla scaletta) restano disattivate.",
+      },
       .done_title = "Il palco è tuo!",
       .done_text = "Il gioco è stato installato. Vai a suonare subito o controlla prima le impostazioni video, grafiche e "
                    "dei tuoi strumenti; potrai sempre cambiarle nel launcher.",

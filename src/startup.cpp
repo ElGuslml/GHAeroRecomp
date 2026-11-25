@@ -197,6 +197,10 @@ debug_hotkeys = false
 # The videos at the start (the logos, the game's intro) skipped: the game starts at its title screen once it has loaded
 # (src/intro.cpp). false = as on the console.
 ghaerosmith_skip_intro = false
+# The game's own debug menu (Neversoft's, src/debug_menu.cpp): true adds a Debug item to the main menu and the pause
+# menu. The development shortcuts the same switch had (unlocking or completing songs from the setlist, the store's
+# money) stay off. Some items need Neversoft's development tools and do nothing. false = as on the console.
+ghaerosmith_debug_menu = false
 # The mouse cursor hidden over the game after cursor_auto_hide_ms without moving it (shown again when it moves, while
 # another window has the focus, and over the SDK's overlays). false = always shown.
 cursor_auto_hide = true
