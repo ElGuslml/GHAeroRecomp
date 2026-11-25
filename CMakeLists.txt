@@ -66,9 +66,11 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${GHAEROSMITH_SO
 set(GHAEROSMITH_SOURCES
     src/crowd.cpp
     src/debug_menu.cpp
+    src/highway_images.cpp
     src/fence_stamps.cpp
     src/mods.cpp
     src/script_globals.cpp
+    src/screen_fx.cpp
     src/framerate.cpp
     src/intro.cpp
     src/keyboard.cpp

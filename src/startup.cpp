@@ -201,6 +201,10 @@ ghaerosmith_skip_intro = false
 # menu. The development shortcuts the same switch had (unlocking or completing songs from the setlist, the store's
 # money) stay off. Some items need Neversoft's development tools and do nothing. false = as on the console.
 ghaerosmith_debug_menu = false
+# The game's screen effects (src/screen_fx.cpp): the bloom (the glow around lights) and the depth of field (the
+# background blurred in some camera shots and in the guitar selection). true = as on the console.
+ghaerosmith_fx_bloom = true
+ghaerosmith_fx_depth_of_field = true
 # The note highway (src/mods.cpp): its size with one player, its length in time and its perspective, in percent (100 = as
 # on the console); with a perspective other than 100, keep_speed makes the notes reach the strike line at the console's
 # speed.
@@ -212,6 +216,22 @@ ghaerosmith_highway_keep_speed = false
 ghaerosmith_highway_style = "original"
 # The note highway's opacity in percent: below 100 the venue shows through it (src/mods.cpp). 100 = as on the console.
 ghaerosmith_highway_opacity = 100
+# Images that replace the game's textures (NativeXRenderer's D176): a folder next to the executable, each image named
+# by the texture's hash (16 hexadecimal digits, then anything; .png, .jpg or .jpeg; subfolders too); the guitarists'
+# note highways are listed in src/highway_images.cpp (Joe Perry's 3452F9C82296C39C; native_x_renderer_texture_log =
+# true logs every texture's hash as it loads).
+native_x_renderer_texture_replacements = "textures"
+# The note highway's picture from a folder (src/highway_images.cpp; the launcher's Mods > Highway gallery writes them),
+# for every guitarist's highway: the folder, the picture (a file of it, "<random>" for a random one at each song, empty
+# for the game's own), where a random one comes from ("all" or "favorites"), the favorites (names separated by |), and
+# how bright pictures are darkened toward black for all ("off", "auto" or a percent) and for some (name:value separated
+# by |). NativeXRenderer only.
+ghaerosmith_highway_folder = ""
+ghaerosmith_highway_image = ""
+ghaerosmith_highway_random_from = "all"
+ghaerosmith_highway_favorites = ""
+ghaerosmith_highway_dim = "off"
+ghaerosmith_highway_image_dims = ""
 # The whammy bar's sound (src/mods.cpp): false keeps a held sustain's pitch (the bar still wobbles the note and fills
 # Star Power). true = as on the console.
 ghaerosmith_whammy_sound = true

@@ -17,6 +17,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggles = {
           "Skip the intro videos", "The game starts at its title screen, without the logos and the intro.",
           "Game debug menu", "Neversoft's debug menu in the main menu and the pause menu.",
+          "Bloom", "The glow around lights and bright surfaces.",
+          "Depth of field", "The background blurred behind what is in focus.",
           "Whammy sound effect", "The whammy bar bends the pitch of your sustained notes.",
           "Lower the track on a miss", "Your part quieter after a miss, as on the console.",
           "Notes at the console's speed", "The notes reach the strike line as fast as at 100 %.",
@@ -24,6 +26,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggle_help = {
           "Skips the logos and the game's intro video at each start: the game opens at its title screen once it has loaded.",
           "Adds a Debug Menu item to the main menu and a Debug item to the pause menu: Neversoft's own menu (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings with the bot and the song's time, ...). Its texts are in English. Unlock All changes the save as playing does; some items need Neversoft's development tools and do nothing. The development shortcuts the same switch had (unlocking or completing songs from the setlist) stay off.",
+          "The halo of light around the stage's lights, the pyrotechnics and the brightest surfaces. Off, the image is sharper and flatter.",
+          "Blurs the background in some camera shots and in the guitar selection, as a camera's lens does. Off, everything stays sharp.",
           "On, as on the console, moving the whammy bar on a sustained note bends your instrument's pitch. Off, the note keeps its pitch; the whammy bar still wobbles the note on the highway and still fills Star Power on Star Power notes.",
           "On, as on the console, a missed note or a strum without one lowers your instrument's track until you hit a note again; the volume under it says how much is left (0 % silences it). Off, your track never changes.",
           "With a perspective other than 100 %, the notes take the same time to cross the highway, so they reach the strike line slower below 100 % (about a fifth slower at 75 %) and faster above it. On, the time on the highway changes with the perspective so they reach it at the console's speed: below 100 % each note shows for less time (on Expert 1.18 s instead of 1.5 at 75 %; a longer highway gives it back), above 100 % for longer. The game's Hyperspeed works on top of it as usual. With two or more players their highways' own perspectives make the notes a little faster than on the console (4-7 % at 75 %). Off, the console's times.",
@@ -61,6 +65,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggles = {
           "Intro-Videos überspringen", "Das Spiel startet am Titelbildschirm, ohne Logos und Intro.",
           "Debug-Menü des Spiels", "Das Debug-Menü von Neversoft im Hauptmenü und im Pausenmenü.",
+          "Bloom", "Das Leuchten um Lichter und helle Flächen.",
+          "Tiefenschärfe", "Der unscharfe Hintergrund hinter dem Fokus.",
           "Whammy-Klangeffekt", "Der Whammy-Hebel verbiegt die Tonhöhe gehaltener Noten.",
           "Spur bei Fehlern leiser", "Dein Part nach einem Fehler leiser, wie auf der Konsole.",
           "Noten im Tempo der Konsole", "Die Noten erreichen die Schlaglinie so schnell wie bei 100 %.",
@@ -68,6 +74,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggle_help = {
           "Überspringt bei jedem Start die Logos und das Intro-Video des Spiels: Das Spiel öffnet nach dem Laden am Titelbildschirm.",
           "Fügt dem Hauptmenü den Eintrag Debug Menu und dem Pausenmenü den Eintrag Debug hinzu: Neversofts eigenes Menü (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings mit dem Bot und der Songzeit, ...). Seine Texte sind auf Englisch. Unlock All ändert den Spielstand wie das Spielen; manche Einträge brauchen Neversofts Entwicklungswerkzeuge und tun nichts. Die Entwicklerabkürzungen desselben Schalters (Songs in der Songliste freischalten oder abschließen) bleiben aus.",
+          "Der Lichtschein um die Bühnenlichter, die Pyrotechnik und die hellsten Flächen. Aus wirkt das Bild schärfer und flacher.",
+          "Macht den Hintergrund in manchen Kameraeinstellungen und in der Gitarrenauswahl unscharf, wie ein Kameraobjektiv. Aus bleibt alles scharf.",
           "An, wie auf der Konsole: Bewegst du den Whammy-Hebel auf einer gehaltenen Note, verbiegt er die Tonhöhe deines Instruments. Aus: Die Note behält ihre Tonhöhe; der Whammy-Hebel lässt die Note auf der Bahn weiter wackeln und füllt auf Star-Power-Noten weiter Star Power.",
           "An, wie auf der Konsole: Eine verpasste Note oder ein Anschlag ohne Note macht die Spur deines Instruments leiser, bis du wieder eine Note triffst; die Lautstärke darunter sagt, wie viel bleibt (0 % schaltet sie stumm). Aus: Deine Spur ändert sich nie.",
           "Mit einer Perspektive außer 100 % brauchen die Noten gleich lang über die Bahn, erreichen die Schlaglinie also unter 100 % langsamer (bei 75 % etwa ein Fünftel) und über 100 % schneller. Eingeschaltet ändert sich die Zeit auf der Bahn mit der Perspektive, sodass sie sie im Tempo der Konsole erreichen: Unter 100 % ist jede Note kürzer zu sehen (auf Experte bei 75 % 1,18 s statt 1,5; eine längere Bahn gleicht das aus), über 100 % länger. Hyperspeed im Spiel wirkt wie gewohnt zusätzlich. Mit zwei oder mehr Spielern sind die Noten durch die eigenen Perspektiven ihrer Bahnen etwas schneller als auf der Konsole (4-7 % bei 75 %). Aus: die Zeiten der Konsole.",
@@ -105,6 +113,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggles = {
           "Passer les vidéos d'intro", "Le jeu démarre sur son écran titre, sans les logos ni l'intro.",
           "Menu de débogage du jeu", "Le menu de débogage de Neversoft dans le menu principal et le menu pause.",
+          "Bloom", "La lueur autour des lumières et des surfaces claires.",
+          "Profondeur de champ", "L'arrière-plan flou derrière le sujet net.",
           "Effet sonore du vibrato", "La barre de vibrato fait varier la hauteur des notes tenues.",
           "Baisser la piste sur une erreur", "Votre partie moins forte après une erreur, comme sur la console.",
           "Notes à la vitesse de la console", "Les notes arrivent à la ligne de frappe aussi vite qu'à 100 %.",
@@ -112,6 +122,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggle_help = {
           "Passe à chaque démarrage les logos et la vidéo d'intro du jeu : le jeu s'ouvre sur son écran titre une fois chargé.",
           "Ajoute l'entrée Debug Menu au menu principal et l'entrée Debug au menu pause : le menu de Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings avec le bot et le temps de la chanson, ...). Ses textes sont en anglais. Unlock All modifie la sauvegarde comme le jeu ; certaines entrées demandent les outils de développement de Neversoft et ne font rien. Les raccourcis de développement du même interrupteur (débloquer ou terminer des chansons depuis la liste) restent désactivés.",
+          "Le halo autour des lumières de la scène, de la pyrotechnie et des surfaces les plus claires. Désactivé, l'image est plus nette et plus plate.",
+          "Floute l'arrière-plan dans certains plans de caméra et dans le choix de la guitare, comme un objectif. Désactivée, tout reste net.",
           "Activé, comme sur la console : bouger la barre de vibrato sur une note tenue fait varier la hauteur de votre instrument. Désactivé, la note garde sa hauteur ; la barre de vibrato fait toujours onduler la note sur la piste et remplit toujours le Star Power sur les notes Star Power.",
           "Activé, comme sur la console : une note ratée ou un grattement sans note baisse la piste de votre instrument jusqu'à la prochaine note réussie ; le volume dessous dit ce qu'il en reste (0 % la coupe). Désactivé, votre piste ne change jamais.",
           "Avec une perspective autre que 100 %, les notes mettent le même temps à parcourir la piste : elles arrivent donc à la ligne de frappe plus lentement sous 100 % (environ un cinquième de moins à 75 %) et plus vite au-dessus. Activé, le temps sur la piste change avec la perspective pour qu'elles y arrivent à la vitesse de la console : sous 100 % chaque note reste visible moins longtemps (en Expert 1,18 s au lieu de 1,5 à 75 % ; une piste plus longue le rend), au-dessus de 100 % plus longtemps. L'Hyperspeed du jeu s'ajoute comme d'habitude. À deux joueurs ou plus, les perspectives propres de leurs pistes rendent les notes un peu plus rapides que sur la console (4 à 7 % à 75 %). Désactivé, les temps de la console.",
@@ -150,6 +162,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggles = {
           "Saltar los videos de introducción", "El juego empieza en su pantalla de inicio, sin los logos ni la intro.",
           "Menú de depuración del juego", "El menú de depuración de Neversoft en el menú principal y en el de pausa.",
+          "Bloom", "El resplandor alrededor de las luces y superficies claras.",
+          "Profundidad de campo", "El fondo desenfocado detrás de lo enfocado.",
           "Efecto de sonido del whammy", "La palanca de whammy dobla el tono de tus notas largas.",
           "Bajar la pista al fallar", "Tu parte más baja después de fallar, como en la consola.",
           "Notas a la velocidad de la consola", "Las notas llegan a la línea de golpe tan rápido como al 100 %.",
@@ -157,6 +171,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggle_help = {
           "Salta en cada inicio los logos y el video de introducción del juego: el juego abre en su pantalla de inicio en cuanto carga.",
           "Añade la opción Debug Menu al menú principal y Debug al menú de pausa: el menú propio de Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings con el bot y el tiempo de la canción, ...). Sus textos están en inglés. Unlock All cambia la partida guardada como jugar; algunas opciones necesitan las herramientas de desarrollo de Neversoft y no hacen nada. Los atajos de desarrollo del mismo interruptor (desbloquear o completar canciones desde la lista) siguen desactivados.",
+          "El halo de luz alrededor de las luces del escenario, la pirotecnia y las superficies más brillantes. Desactivado, la imagen se ve más nítida y plana.",
+          "Desenfoca el fondo en algunas tomas de cámara y en la selección de guitarra, como el lente de una cámara. Desactivada, todo se ve nítido.",
           "Activado, como en la consola, mover la palanca de whammy en una nota larga dobla el tono de tu instrumento. Desactivado, la nota mantiene su tono; la palanca sigue haciendo ondular la nota en el highway y sigue llenando el Star Power en las notas de Star Power.",
           "Activado, como en la consola, una nota fallada o un rasgueo sin nota bajan la pista de tu instrumento hasta que aciertes otra; el volumen de abajo dice cuánto queda (0 % la silencia). Desactivado, tu pista nunca cambia.",
           "Con una perspectiva distinta de 100 % las notas tardan lo mismo en recorrer el highway, así que llegan a la línea de golpe más lento bajo 100 % (cerca de una quinta parte menos al 75 %) y más rápido sobre 100 %. Activado, el tiempo en el highway cambia con la perspectiva para que lleguen a la velocidad de la consola: bajo 100 % cada nota se ve menos tiempo (en Experto 1,18 s en vez de 1,5 al 75 %; un highway más largo lo devuelve), sobre 100 % más tiempo. El Hyperspeed del juego funciona encima como siempre. Con dos o más jugadores, las perspectivas propias de sus highways hacen las notas algo más rápidas que en la consola (4-7 % al 75 %). Desactivado, los tiempos de la consola.",
@@ -195,6 +211,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggles = {
           "Salta i video introduttivi", "Il gioco parte dalla schermata del titolo, senza i loghi né l'intro.",
           "Menu di debug del gioco", "Il menu di debug di Neversoft nel menu principale e nel menu di pausa.",
+          "Bloom", "Il bagliore attorno alle luci e alle superfici chiare.",
+          "Profondità di campo", "Lo sfondo sfocato dietro ciò che è a fuoco.",
           "Effetto sonoro della leva whammy", "La leva whammy piega l'intonazione delle note lunghe.",
           "Abbassa la traccia sugli errori", "La tua parte più bassa dopo un errore, come sulla console.",
           "Note alla velocità della console", "Le note arrivano alla linea di battuta veloci come al 100 %.",
@@ -202,6 +220,8 @@ const GameTexts& GameTextsFor(uint32_t language) {
       .toggle_help = {
           "Salta a ogni avvio i loghi e il video introduttivo del gioco: il gioco si apre sulla schermata del titolo appena caricato.",
           "Aggiunge la voce Debug Menu al menu principale e Debug al menu di pausa: il menu di Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings con il bot e il tempo della canzone, ...). I suoi testi sono in inglese. Unlock All modifica il salvataggio come il gioco; alcune voci richiedono gli strumenti di sviluppo di Neversoft e non fanno nulla. Le scorciatoie di sviluppo dello stesso interruttore (sbloccare o completare canzoni dalla scaletta) restano disattivate.",
+          "L'alone di luce attorno alle luci del palco, alla pirotecnica e alle superfici più luminose. Disattivato, l'immagine è più nitida e piatta.",
+          "Sfoca lo sfondo in alcune inquadrature e nella scelta della chitarra, come l'obiettivo di una telecamera. Disattivata, tutto resta nitido.",
           "Attivato, come sulla console, muovere la leva whammy su una nota lunga piega l'intonazione del tuo strumento. Disattivato, la nota mantiene la sua intonazione; la leva fa ancora ondeggiare la nota sulla pista e riempie ancora lo Star Power sulle note Star Power.",
           "Attivato, come sulla console, una nota sbagliata o una pennata senza nota abbassano la traccia del tuo strumento finché non colpisci di nuovo una nota; il volume sotto dice quanto ne resta (0 % la silenzia). Disattivato, la tua traccia non cambia mai.",
           "Con una prospettiva diversa dal 100 % le note impiegano lo stesso tempo a percorrere la pista, quindi arrivano alla linea di battuta più lente sotto il 100 % (circa un quinto in meno al 75 %) e più veloci sopra. Attivato, il tempo sulla pista cambia con la prospettiva perché vi arrivino alla velocità della console: sotto il 100 % ogni nota resta visibile meno a lungo (in Esperto 1,18 s invece di 1,5 al 75 %; una pista più lunga lo restituisce), sopra il 100 % più a lungo. L'Hyperspeed del gioco si aggiunge come sempre. Con due o più giocatori le prospettive proprie delle loro piste rendono le note un po' più veloci che sulla console (4-7 % al 75 %). Disattivato, i tempi della console.",

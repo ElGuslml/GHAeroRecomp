@@ -316,3 +316,11 @@ registers = ["r4"]
 address = 0x82116168   # lis r11,-32113 (after the players' guitar_volume and guitar_always_volume_100 are read)
 name = "GHAerosmithMissVolumeHook"
 registers = ["r18", "r19", "r24", "r25", "r26", "r31"]
+
+# The screen effects each turned off by an option (src/screen_fx.cpp, ghaerosmith_fx_*): a screen effect added to a
+# viewport's manager (sub_82381958, from ScreenFX_AddFXInstance; r4 its parameters) is not made when its type is off.
+[[midasm_hook]]
+address = 0x82381958   # mflr r12 (the entry of sub_82381958)
+name = "GHAerosmithScreenFxAddHook"
+registers = ["r3", "r4"]
+return_on_true = true

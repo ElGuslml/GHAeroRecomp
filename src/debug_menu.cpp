@@ -31,6 +31,7 @@
 #include <mutex>
 #include <set>
 
+#include "highway_images.h"
 #include "mods.h"
 #include "script_globals.h"
 
@@ -43,6 +44,7 @@ namespace {
 constexpr uint32_t kEnableButtonCheats = 0x2AF92804;  // the script global enable_button_cheats
 constexpr uint32_t kCreateMainMenu = 0x43634516;      // the main menu's items
 constexpr uint32_t kCreatePauseMenu = 0x3562432C;     // the pause menu's items
+constexpr uint32_t kSetupHighway = 0x23D93A37;        // setup_highway: a song's highways made (src/highway_images.cpp)
 constexpr uint8_t kTypeMask = 0x7F;
 constexpr uint8_t kTypeInteger = 1;
 constexpr uint8_t kTypeName = 13;
@@ -60,9 +62,15 @@ bool ModReads() {
   return reads;
 }
 
+// Whether a random highway picture changes at each song (src/highway_images.cpp, configured with the mods).
+bool WatchesSongs() {
+  static const bool watches = (ModReads(), ghaerosmith::highway::Random());
+  return watches;
+}
+
 // Whether the evaluation hooks must know each read's script. ModReads first, so the mods are configured before
 // script::Pending() is asked.
-bool Active() { return ModReads() || DebugMenu(); }
+bool Active() { return ModReads() || DebugMenu() || WatchesSongs(); }
 
 uint8_t* GuestBase() {
   auto* kernel = rex::system::kernel_state();
@@ -113,6 +121,11 @@ void GHAerosmithScriptEvalEnterHook(PPCRegister& r31) {
     e.scripts[e.depth] = r31.u32;
   }
   ++e.depth;
+  if (WatchesSongs()) {
+    if (const uint8_t* base = GuestBase(); base && r31.u32 && Load32(base, r31.u32 + kScriptName) == kSetupHighway) {
+      ghaerosmith::highway::OnHighwaySetup();
+    }
+  }
 }
 
 // [[midasm_hook]] 0x82179F18, 0x8217A1F4 and 0x8217A244 (sub_82179D38, after each of those calls).

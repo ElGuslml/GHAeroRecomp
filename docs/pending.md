@@ -14,8 +14,10 @@ this game runs on Guitar Hero III's engine, so each of GH Metallica's fixes has 
   at `0x82B94030`), its statement is `sub_82179D38` (r31 the script, its name at +216). The same functions serve
   GH5's mods: the highway's scale, length, perspective, style and opacity, the whammy bar's sound and the volume on a
   miss, done ([mods.md](mods.md)).
-- **The screen effects' switches** (GH Metallica's `src/screen_fx.cpp`): this engine's post-processing composite is not
-  mapped.
+- **The screen effects' switches:** done on 2026-11-24 for the bloom and the depth of field
+  ([screen-effects.md](screen-effects.md)): this engine has no composite; each effect is made by its type
+  (`sub_82381958`), and one turned off is not made. The color correction is neutral here and the vignette is the fade
+  to black: no switch.
 - **V-Sync with G-Sync, the game's side:** done on 2026-11-13 (`docs/fixes-from-gh-metallica.md`, "The render thread
   woken by the counters"); left: a look on a G-Sync / FreeSync display, where GH Metallica's saw tooth showed.
 - **Each controller's kind** (GH Metallica's issue 4: a port's kind asked again outside a song): this engine tells

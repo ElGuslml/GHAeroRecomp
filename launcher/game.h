@@ -44,8 +44,9 @@ inline constexpr const char* kBrandIcon =
 // The header's name beside the logo, on two lines (in capitals); an empty title: the art's (kArtTitle) alone.
 inline constexpr const char* kBrandTitle = "Guitar Hero";
 inline constexpr const char* kBrandSubtitle = "Aerosmith";
-// Where the art under the pages (launcher\art\background.svg, 1280 x 760: the template's, until the game has its own)
-// is cropped in a window of another shape: the point kept in view, as fractions of its width and height.
+// Where the art under the pages (launcher\art\background.svg, 1280 x 760: Gustavo's mockup's psychedelic vinyl, made
+// drawable by nanosvg by tools\launcher_art\make_art.py) is cropped in a window of another shape: the point kept in view,
+// as fractions of its width and height. 0.6: the record's center between the header and the footer at 16:9 and 21:9.
 inline constexpr float kArtFocusX = 0.75f;
 inline constexpr float kArtFocusY = 0.6f;
 // The logo's mark on a disc instead of a rounded square.
@@ -152,9 +153,12 @@ inline constexpr std::array<Language, 5> kLanguages{{
 // Starting the game (launcher 3.28's kStart), off as on the console: the boot's videos skipped (src/intro.cpp). Then
 // in Settings > Game, off as on the console: the game's debug menu (src/debug_menu.cpp, docs/debug-menu.md). In Mods >
 // Sound, on as on the console: the whammy bar's bend and the instrument's track lowered on a miss (src/mods.cpp).
-inline constexpr std::array<Toggle, 5> kToggles{{
+// In Settings > Graphics > Screen effects, on as on the console: the bloom and the depth of field (src/screen_fx.cpp).
+inline constexpr std::array<Toggle, 7> kToggles{{
     {"ghaerosmith_skip_intro", false, ToggleGroup::kStart},
     {"ghaerosmith_debug_menu", false},
+    {"ghaerosmith_fx_bloom", true, ToggleGroup::kScreenEffects},
+    {"ghaerosmith_fx_depth_of_field", true, ToggleGroup::kScreenEffects},
     {"ghaerosmith_whammy_sound", true, ToggleGroup::kModsSound},
     {"ghaerosmith_miss_lower", true, ToggleGroup::kModsSound},
     {"ghaerosmith_highway_keep_speed", false, ToggleGroup::kModsHighway, "ghaerosmith_highway_perspective"},
@@ -182,10 +186,44 @@ inline constexpr std::array<Choice, 6> kChoices{{
     {"ghaerosmith_miss_volume", kMissVolumes, "0", ToggleGroup::kModsSound, " %", false, "ghaerosmith_miss_lower"},
 }};
 
-// The Mods tab's Highway section's gallery and preview (launcher 3.30): this game has no highway mods.
-inline constexpr bool kHighwayPreview = false;
-inline constexpr HighwayGallery kHighwayGallery{};
-inline constexpr HighwayAssets kHighwayAssets{};
+// Launcher 3.30: the Mods tab's Highway section, its gallery of the player's pictures (src/highway_images.cpp reads
+// the cvars) and its preview, drawn from the installed game's own textures (launcher 3.34 reads Guitar Hero III's packs:
+// one raw deflate stream, the .pab after the .pak). The gems, the strike line's rings, the string, the beat line and the
+// sidebar are in DATA/COMPRESSED/ZONES/global.pak.xen / .pab.xen's global_gfx.tex (keys found by decoding it: each
+// lane's note, a colored body with a white top, and its ring on the strike line, black with a colored rim); the
+// highway is Joe Perry's, joep_1_highway.tex in DATA/COMPRESSED/PAK/JoeP_1.pak.xen (every guitarist has his own; the
+// game's picture replaces all of them). The sidebar and the sustain are a white line of global_gfx (7F2DACD6), the
+// sustain tinted by its lane.
+inline constexpr bool kHighwayPreview = true;
+inline constexpr HighwayGallery kHighwayGallery{
+    "ghaerosmith_highway_folder",     "ghaerosmith_highway_image",       "ghaerosmith_highway_random_from",
+    "ghaerosmith_highway_favorites",  "ghaerosmith_highway_dim",         "ghaerosmith_highway_image_dims",
+    L"Highways",                      "ghaerosmith_highway_scale",       "ghaerosmith_highway_length",
+    "ghaerosmith_highway_perspective", "ghaerosmith_highway_opacity",    "ghaerosmith_highway_style",
+    "dark",                           "ghaerosmith_highway_keep_speed",
+};
+inline constexpr uint32_t kLaneGems[] = {0x151EE874, 0x27DD8DC4, 0x39E35D20, 0xC715D48D, 0xA5A7F110};
+inline constexpr uint32_t kLaneCollars[] = {0x8DA374D1, 0xE539F99E, 0xCB2DD2BE, 0x06861F88, 0x86C8DB75};
+inline constexpr HighwayAssets kHighwayAssets{
+    L"DATA/COMPRESSED/ZONES/global.pak.xen",
+    0x406D171F,  // global_gfx.tex
+    0xC72FEC05,  // Joe Perry's highway (in highway_pak)
+    0x7F2DACD6,  // a white line (the sidebar)
+    0x2ED9AC77,  // string
+    0xC1832175,  // a beat line
+    0,           // the rings: kLaneCollars
+    0,           // the gems: kLaneGems
+    0,
+    0,
+    0x7F2DACD6,  // the white line (a sustain)
+    // guitar_tweaks.qb's highway_height1, highway_top_width1, widthOffsetFactor1 and the perspective table's entry
+    // for 350 (src/mods.cpp); Expert's scroll_time - destroy_time; gHighwayTiling1.
+    655.0f, 350.0f, 160.0f, 512.0f, 1.0008859634399414, 1.001541018486023, 1024, 1.5f, 50.0f, 1.5f,
+    L"DATA/COMPRESSED/PAK/JoeP_1.pak.xen",
+    0x6186D380,  // models/guitarists/joep_1_highway.tex
+    kLaneGems,
+    kLaneCollars,
+};
 
 // Whether some switch is in `group`.
 constexpr bool HasToggles(ToggleGroup group) {

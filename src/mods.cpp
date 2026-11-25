@@ -25,6 +25,14 @@
 //   - The table entries at the new heights' indexes get the new f and e (each player count's own).
 //   - With ghaerosmith_highway_keep_speed and a perspective other than 100 %, the times are also multiplied by the
 //     strike line row's share of the highway against the console's: the notes reach the strike line at its speed.
+//   - A held sustain's end (whammy_cutoff, guitar_tweaks.qb 1100): while the note is held (the sustain's "holding"
+//     tag, CheckNoteHoldStart to CheckNoteHoldEnd), UpdateGemMovers (sub_821154A0) keeps the sustain's near end at the
+//     row whammy_cutoff x 1024 / 1152 (977.8, 47 pixels above the strike line on the console, inside the fret's flame),
+//     where it is cut; at the hold's end the piece left becomes a dead sustain and slides away. That row is a share of
+//     the time on the highway, so a longer or steeper highway drew it higher (length 150 %: 68 pixels; perspective
+//     150 %: 70) and left a longer dead piece below the frets. With the length or the perspective changed,
+//     whammy_cutoff is the row at the console's distance above the strike line on the one-player highway (length
+//     150 %: 1117; the two-player highway's within a few rows); the scale keeps it (every size with it).
 //   - Highway scale s (one player): every one-player size times s, anchored at the strike line (the height, the widths,
 //     the gems', beat lines', sustains', sidebars', strikers' and Star Power effect's scales, the fade), the projection
 //     kept (its table entry at the scaled height's index). GH III has no highway_scale_chart (GH5's): the rock meter and
@@ -74,6 +82,7 @@
 #include <string>
 #include <vector>
 
+#include "highway_images.h"
 #include "script_globals.h"
 
 REXCVAR_DEFINE_INT32(ghaerosmith_highway_scale, 100, "GHAerosmith",
@@ -111,6 +120,8 @@ namespace {
 
 constexpr double kPlayline = 655.0;  // highway_playline1 and 2
 constexpr int kRows = 1024;          // real_highway_lines
+constexpr int kAllRows = 1152;       // highway_lines: the rows' tables, to below the strike line
+constexpr double kConsoleCutoff = 1100.0;  // whammy_cutoff
 constexpr double kHighestTop = 50.0;  // the far end no higher than this (of 720)
 constexpr int kTableBase = 162;       // generate_pos_table: the tables' index is highway_height - 162, 0 to 510
 constexpr int kTableLast = 510;
@@ -198,6 +209,53 @@ Shape Make(const Console& console, double p, double k) {
   return out;
 }
 
+// The rows' places as UpdateGemMovers reads them for a fractional row r: time_accum_table[r] (the rows' heights,
+// normalised over the 1024, summed through r) plus the fraction times gem_time_table512[r + 1] - gem_time_table512[r].
+class Places {
+ public:
+  explicit Places(const Projection& p) : step_(kAllRows), through_(kAllRows) {
+    std::vector<double> h(kAllRows);
+    h[0] = 1.0;
+    for (int i = 1; i < kAllRows; ++i) {
+      h[i] = std::pow(h[i - 1] * p.f, p.e);
+    }
+    double sum = 0.0;
+    for (int i = 0; i < kRows; ++i) {
+      sum += h[i];
+    }
+    for (int i = 0; i < kAllRows; ++i) {
+      step_[i] = h[i] / sum;
+      through_[i] = (i ? through_[i - 1] : 0.0) + step_[i];
+    }
+  }
+  double At(double row) const {
+    const int whole = std::clamp(int(row), 0, kAllRows - 1);
+    const int next = std::min(whole + 1, kAllRows - 1);
+    return through_[whole] + (step_[next] - step_[whole]) * (row - whole);
+  }
+
+ private:
+  std::vector<double> step_;
+  std::vector<double> through_;
+};
+
+// whammy_cutoff for a highway shape: the row where a held sustain is cut at the console's distance above the strike line.
+double WhammyCutoff(const Console& console, const Shape& shape) {
+  const Places before(console.projection);
+  const Places after(shape.projection);
+  const auto above = [](const Places& places, double height, double row) {
+    return (places.At(row) - places.At(kRows)) * height;  // negative: pixels above the strike line
+  };
+  const double target = above(before, console.height, kConsoleCutoff * kRows / kAllRows);
+  double low = 0.0;
+  double high = kRows;
+  for (int i = 0; i < 50; ++i) {
+    const double middle = (low + high) / 2.0;
+    (above(after, shape.height, middle) < target ? low : high) = middle;
+  }
+  return low * kAllRows / kRows;
+}
+
 // The changes of one player count's highway: the shape `shape` at the scale `s` (one player only).
 void Apply(const Console& c, const Shape& shape, double s, bool changed_shape, double extra_height) {
   const std::string n = c.suffix;
@@ -283,6 +341,15 @@ void Configure() {
       script::Scale("gHighwayTiling1", k);
       script::Scale("gHighwayTiling2", k);
     }
+    if (changed_shape) {
+      // A held sustain cut where it is on the console, inside the fret's flame.
+      const double cutoff = WhammyCutoff(kOnePlayer, one);
+      script::Set("whammy_cutoff", cutoff);
+      REXLOG_INFO("[mods] a held sustain cut at whammy_cutoff {:.1f} (the console's 1100: {:.0f} pixels above the strike "
+                  "line)",
+                  cutoff, -(Places(kOnePlayer.projection).At(kConsoleCutoff * kRows / kAllRows) -
+                            Places(kOnePlayer.projection).At(kRows)) * kOnePlayer.height);
+    }
     // The times on the highway: the length's, and with ghaerosmith_highway_keep_speed the perspective's speed.
     const double speed = perspective != 100 ? StrikeLineSpeed(kOnePlayer, p) : 1.0;
     const bool keep_speed = perspective != 100 && REXCVAR_GET(ghaerosmith_highway_keep_speed);
@@ -341,6 +408,7 @@ void Configure() {
   if (!summary.empty()) {
     REXLOG_INFO("[mods]{}", summary);
   }
+  highway::Configure();  // the highway's picture (src/highway_images.cpp)
 }
 
 int32_t MissVolume() {
