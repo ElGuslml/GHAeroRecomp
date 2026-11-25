@@ -201,6 +201,10 @@ ghaerosmith_skip_intro = false
 # menu. The development shortcuts the same switch had (unlocking or completing songs from the setlist, the store's
 # money) stay off. Some items need Neversoft's development tools and do nothing. false = as on the console.
 ghaerosmith_debug_menu = false
+# The note highway's look (src/mods.cpp): "original", or "dark" (the community's black highway).
+ghaerosmith_highway_style = "original"
+# The note highway's opacity in percent: below 100 the venue shows through it (src/mods.cpp). 100 = as on the console.
+ghaerosmith_highway_opacity = 100
 # The mouse cursor hidden over the game after cursor_auto_hide_ms without moving it (shown again when it moves, while
 # another window has the focus, and over the SDK's overlays). false = always shown.
 cursor_auto_hide = true

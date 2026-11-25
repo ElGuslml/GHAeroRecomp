@@ -156,8 +156,16 @@ inline constexpr std::array<Toggle, 2> kToggles{{
     {"ghaerosmith_debug_menu", false},
 }};
 
-// Rows of the game's own with several values (launcher 3.29): none here.
-inline constexpr std::array<Choice, 0> kChoices{};
+// Rows of the game's own with several values (game_types.h's Choice, launcher 3.29), GH5's: Mods > Highway's look, the
+// note highway's style (the original, or the community's black highway) and its opacity (the venue seen through it),
+// each a change of the game's script data when it starts (src/mods.cpp). Their titles, hints, help and the styles'
+// names are game.cpp's.
+inline constexpr const char* kHighwayStyles[] = {"original", "dark"};
+inline constexpr const char* kHighwayOpacities[] = {"100", "90", "80", "70", "60", "50", "40", "30"};
+inline constexpr std::array<Choice, 2> kChoices{{
+    {"ghaerosmith_highway_style", kHighwayStyles, "original", ToggleGroup::kModsHighwayLook, "", true},
+    {"ghaerosmith_highway_opacity", kHighwayOpacities, "100", ToggleGroup::kModsHighwayLook, " %"},
+}};
 
 // The Mods tab's Highway section's gallery and preview (launcher 3.30): this game has no highway mods.
 inline constexpr bool kHighwayPreview = false;

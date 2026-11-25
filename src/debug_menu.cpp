@@ -15,6 +15,9 @@
 // sub_822FF180 (an expression in parentheses, as the menus' "if ($enable_button_cheats = 1)"), once with sub_8219BF30
 // itself (a component of type 26). Hooks there keep, per thread, the scripts whose expressions are being evaluated;
 // the running script's name is at +216 of it (as src/framerate.cpp and src/crowd.cpp read it).
+//
+// The same hooks serve the mods (src/mods.cpp, src/script_globals.cpp, as GH5's): a global changed in place at its
+// first read, and globals read as another value by one script.
 
 #include <rex/cvar.h>
 #include <rex/logging.h>
@@ -27,6 +30,9 @@
 #include <cstring>
 #include <mutex>
 #include <set>
+
+#include "mods.h"
+#include "script_globals.h"
 
 REXCVAR_DEFINE_BOOL(ghaerosmith_debug_menu, false, "GHAerosmith",
                     "The game's own debug menu (Neversoft's): an item in the main menu and the pause menu that opens "
@@ -43,10 +49,20 @@ constexpr uint8_t kTypeName = 13;
 constexpr uint8_t kTypeGlobalAlias = 26;
 constexpr uint32_t kScriptName = 216;  // the running script's name in the interpreter's script object
 
-bool Enabled() {
+bool DebugMenu() {
   static const bool enabled = REXCVAR_GET(ghaerosmith_debug_menu);
   return enabled;
 }
+
+// Whether a mod reads a global as another value in some script (src/mods.cpp, configured at the first call).
+bool ModReads() {
+  static const bool reads = (ghaerosmith::mods::Configure(), ghaerosmith::script::NeedsScriptNames());
+  return reads;
+}
+
+// Whether the evaluation hooks must know each read's script. ModReads first, so the mods are configured before
+// script::Pending() is asked.
+bool Active() { return ModReads() || DebugMenu(); }
 
 uint8_t* GuestBase() {
   auto* kernel = rex::system::kernel_state();
@@ -89,7 +105,7 @@ void LogOnce(uint32_t script, bool shown) {
 // [[midasm_hook]] 0x82179F14, 0x8217A1F0 (sub_82179D38, at each bl sub_822FF180) and 0x8217A240 (its bl
 // sub_8219BF30): r31 = the script.
 void GHAerosmithScriptEvalEnterHook(PPCRegister& r31) {
-  if (!Enabled()) {
+  if (!Active()) {
     return;
   }
   Evaluations& e = t_evaluations;
@@ -101,7 +117,7 @@ void GHAerosmithScriptEvalEnterHook(PPCRegister& r31) {
 
 // [[midasm_hook]] 0x82179F18, 0x8217A1F4 and 0x8217A244 (sub_82179D38, after each of those calls).
 void GHAerosmithScriptEvalLeaveHook() {
-  if (!Enabled()) {
+  if (!Active()) {
     return;
   }
   Evaluations& e = t_evaluations;
@@ -111,9 +127,11 @@ void GHAerosmithScriptEvalLeaveHook() {
 }
 
 // [[midasm_hook]] 0x8219BF30 (the entry of sub_8219BF30: a "$name" component resolved to the global's value),
-// return_on_true: r3 = the component. enable_button_cheats read by the menus' scripts becomes the integer 1.
+// return_on_true: r3 = the component. A mod's change of that global lands first (src/script_globals.cpp); a mod's read
+// as another value, or enable_button_cheats read by the menus' scripts as the integer 1, writes the component.
 bool GHAerosmithGlobalResolveHook(PPCRegister& r3) {
-  if (!Enabled()) {
+  const bool active = Active();
+  if (!active && !ghaerosmith::script::Pending()) {
     return false;
   }
   uint8_t* base = GuestBase();
@@ -123,14 +141,20 @@ bool GHAerosmithGlobalResolveHook(PPCRegister& r3) {
   }
   const uint8_t flags = base[component + 1];
   const uint8_t type = flags & kTypeMask;
-  if ((type != kTypeName && type != kTypeGlobalAlias) || Load32(base, component + 8) != kEnableButtonCheats) {
+  if (type != kTypeName && type != kTypeGlobalAlias) {
     return false;
   }
   const Evaluations& e = t_evaluations;
-  if (e.depth == 0 || e.depth > e.scripts.size() || !e.scripts[e.depth - 1]) {
+  // The reading script: known only while the evaluation hooks run (Active), and not for compiled scripts.
+  const bool known = active && e.depth > 0 && e.depth <= e.scripts.size() && e.scripts[e.depth - 1];
+  const uint32_t global = Load32(base, component + 8);
+  const uint32_t script = known ? Load32(base, e.scripts[e.depth - 1] + kScriptName) : 0;
+  if (ghaerosmith::script::OnResolve(base, component, global, script)) {
+    return true;
+  }
+  if (!known || !DebugMenu() || global != kEnableButtonCheats) {
     return false;
   }
-  const uint32_t script = Load32(base, e.scripts[e.depth - 1] + kScriptName);
   const bool menu = script == kCreateMainMenu || script == kCreatePauseMenu;
   LogOnce(script, menu);
   if (!menu) {

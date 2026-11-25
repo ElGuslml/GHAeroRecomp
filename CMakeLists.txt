@@ -67,6 +67,8 @@ set(GHAEROSMITH_SOURCES
     src/crowd.cpp
     src/debug_menu.cpp
     src/fence_stamps.cpp
+    src/mods.cpp
+    src/script_globals.cpp
     src/framerate.cpp
     src/intro.cpp
     src/keyboard.cpp

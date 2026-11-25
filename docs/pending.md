@@ -11,8 +11,9 @@ this game runs on Guitar Hero III's engine, so each of GH Metallica's fixes has 
   stays here until `fmod_mix.cpp` is ported to this FMOD.
 - **The game's debug menu:** done on 2026-11-24 ([debug-menu.md](debug-menu.md)): Guitar Hero III's interpreter
   resolves a `$name` in `sub_8219BF30` (a component's type in the low 7 bits of +1, the key at +8; the globals' table
-  at `0x82B94030`), its statement is `sub_82179D38` (r31 the script, its name at +216). The same functions open the
-  way to GH5's script-global mods (the highway, the whammy and miss sounds), still to do.
+  at `0x82B94030`), its statement is `sub_82179D38` (r31 the script, its name at +216). The same functions serve
+  GH5's script-global mods: the highway's style and opacity done ([mods.md](mods.md)); its scale, length and
+  perspective, the whammy bar's sound and the volume on a miss still to do.
 - **The screen effects' switches** (GH Metallica's `src/screen_fx.cpp`): this engine's post-processing composite is not
   mapped.
 - **V-Sync with G-Sync, the game's side:** done on 2026-11-13 (`docs/fixes-from-gh-metallica.md`, "The render thread

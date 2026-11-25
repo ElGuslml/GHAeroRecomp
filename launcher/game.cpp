@@ -22,6 +22,15 @@ const GameTexts& GameTextsFor(uint32_t language) {
           "Skips the logos and the game's intro video at each start: the game opens at its title screen once it has loaded.",
           "Adds a Debug Menu item to the main menu and a Debug item to the pause menu: Neversoft's own menu (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings with the bot and the song's time, ...). Its texts are in English. Unlock All changes the save as playing does; some items need Neversoft's development tools and do nothing. The development shortcuts the same switch had (unlocking or completing songs from the setlist) stay off.",
       },
+      .choices = {
+          "Highway style", "The look of the highway behind the notes.",
+          "Highway opacity", "How much of the venue shows through the highway.",
+      },
+      .choice_help = {
+          "Dark is the community's black highway: the highway's picture turned black, so the gems, the sustains and the lines stand out against it.",
+          "Below 100 % the venue shows through the note highway: the notes, the lines and the sidebars stay solid. 100 % is the console's opaque highway.",
+      },
+      .choice_values = {{{"Original", "Dark"}, {}}},
       .done_title = "The stage is yours!",
       .done_text = "The game was installed. Go play now, or first review the video, graphics and instrument settings; "
                    "you can always change them in the launcher.",
@@ -43,6 +52,15 @@ const GameTexts& GameTextsFor(uint32_t language) {
           "Überspringt bei jedem Start die Logos und das Intro-Video des Spiels: Das Spiel öffnet nach dem Laden am Titelbildschirm.",
           "Fügt dem Hauptmenü den Eintrag Debug Menu und dem Pausenmenü den Eintrag Debug hinzu: Neversofts eigenes Menü (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings mit dem Bot und der Songzeit, ...). Seine Texte sind auf Englisch. Unlock All ändert den Spielstand wie das Spielen; manche Einträge brauchen Neversofts Entwicklungswerkzeuge und tun nichts. Die Entwicklerabkürzungen desselben Schalters (Songs in der Songliste freischalten oder abschließen) bleiben aus.",
       },
+      .choices = {
+          "Notenbahn-Stil", "Das Aussehen der Bahn hinter den Noten.",
+          "Deckkraft der Notenbahn", "Wie viel von der Location durch die Bahn scheint.",
+      },
+      .choice_help = {
+          "Dunkel ist die schwarze Notenbahn der Community: Das Bild der Bahn wird schwarz, sodass Noten, gehaltene Noten und Linien hervorstechen.",
+          "Unter 100 % scheint die Location durch die Notenbahn: Noten, Linien und Seitenleisten bleiben deckend. 100 % ist die deckende Bahn der Konsole.",
+      },
+      .choice_values = {{{"Original", "Dunkel"}, {}}},
       .done_title = "Die Bühne gehört dir!",
       .done_text = "Das Spiel wurde installiert. Leg gleich los oder sieh dir zuerst die Video-, Grafik- und "
                    "Instrumenteinstellungen an; du kannst sie jederzeit im Launcher ändern.",
@@ -64,6 +82,15 @@ const GameTexts& GameTextsFor(uint32_t language) {
           "Passe à chaque démarrage les logos et la vidéo d'intro du jeu : le jeu s'ouvre sur son écran titre une fois chargé.",
           "Ajoute l'entrée Debug Menu au menu principal et l'entrée Debug au menu pause : le menu de Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings avec le bot et le temps de la chanson, ...). Ses textes sont en anglais. Unlock All modifie la sauvegarde comme le jeu ; certaines entrées demandent les outils de développement de Neversoft et ne font rien. Les raccourcis de développement du même interrupteur (débloquer ou terminer des chansons depuis la liste) restent désactivés.",
       },
+      .choices = {
+          "Style de la piste", "L'aspect de la piste derrière les notes.",
+          "Opacité de la piste", "Ce qu'on voit de la salle à travers la piste.",
+      },
+      .choice_help = {
+          "Sombre est la piste noire de la communauté : l'image de la piste devient noire, pour que les notes, les notes tenues et les lignes ressortent.",
+          "Sous 100 %, la salle se voit à travers la piste de notes : les notes, les lignes et les bords restent opaques. 100 % est la piste opaque de la console.",
+      },
+      .choice_values = {{{"Originale", "Sombre"}, {}}},
       .done_title = "La scène est à vous !",
       .done_text = "Le jeu a été installé. Allez jouer tout de suite, ou vérifiez d'abord les réglages vidéo, "
                    "graphiques et de vos instruments ; vous pourrez toujours les changer dans le launcher.",
@@ -86,6 +113,15 @@ const GameTexts& GameTextsFor(uint32_t language) {
           "Salta en cada inicio los logos y el video de introducción del juego: el juego abre en su pantalla de inicio en cuanto carga.",
           "Añade la opción Debug Menu al menú principal y Debug al menú de pausa: el menú propio de Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings con el bot y el tiempo de la canción, ...). Sus textos están en inglés. Unlock All cambia la partida guardada como jugar; algunas opciones necesitan las herramientas de desarrollo de Neversoft y no hacen nada. Los atajos de desarrollo del mismo interruptor (desbloquear o completar canciones desde la lista) siguen desactivados.",
       },
+      .choices = {
+          "Estilo del highway", "El aspecto del highway detrás de las notas.",
+          "Opacidad del highway", "Cuánto del escenario se ve a través del highway.",
+      },
+      .choice_help = {
+          "Oscuro es el highway negro de la comunidad: la imagen del highway se vuelve negra, así las notas, las notas largas y las líneas resaltan.",
+          "Bajo 100 % el escenario se ve a través del highway de notas: las notas, las líneas y los bordes siguen opacos. 100 % es el highway opaco de la consola.",
+      },
+      .choice_values = {{{"Original", "Oscuro"}, {}}},
       .done_title = "¡El escenario es tuyo!",
       .done_text = "El juego se instaló correctamente. Puedes salir a tocar ya o revisar primero los ajustes de video, "
                    "gráficos y tus instrumentos; siempre podrás cambiarlos desde el launcher.",
@@ -108,6 +144,15 @@ const GameTexts& GameTextsFor(uint32_t language) {
           "Salta a ogni avvio i loghi e il video introduttivo del gioco: il gioco si apre sulla schermata del titolo appena caricato.",
           "Aggiunge la voce Debug Menu al menu principale e Debug al menu di pausa: il menu di Neversoft (Unlock All, Play Song, Skip Into Song, Character Select, Play Credits, Settings con il bot e il tempo della canzone, ...). I suoi testi sono in inglese. Unlock All modifica il salvataggio come il gioco; alcune voci richiedono gli strumenti di sviluppo di Neversoft e non fanno nulla. Le scorciatoie di sviluppo dello stesso interruttore (sbloccare o completare canzoni dalla scaletta) restano disattivate.",
       },
+      .choices = {
+          "Stile della pista", "L'aspetto della pista dietro le note.",
+          "Opacità della pista", "Quanto del locale si vede attraverso la pista.",
+      },
+      .choice_help = {
+          "Scuro è la pista nera della community: l'immagine della pista diventa nera, così le note, le note lunghe e le linee risaltano.",
+          "Sotto il 100 % il locale si vede attraverso la pista delle note: le note, le linee e i bordi restano opachi. 100 % è la pista opaca della console.",
+      },
+      .choice_values = {{{"Originale", "Scuro"}, {}}},
       .done_title = "Il palco è tuo!",
       .done_text = "Il gioco è stato installato. Vai a suonare subito o controlla prima le impostazioni video, grafiche e "
                    "dei tuoi strumenti; potrai sempre cambiarle nel launcher.",
